@@ -8,11 +8,12 @@ def col_eprint(err):
 class colony:
 	def __init__(self):
 		self.antn = 0
-		self.size = 0
+		self.size = 0 #number of rooms
 		self.rooms = {}
 		self.links = []
 		self.start = ""
 		self.end = ""
+		self.turns = []
 
 	#TODO: obviously finish this
 	def add_room(self, name, x, y):

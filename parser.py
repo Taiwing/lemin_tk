@@ -57,14 +57,31 @@ def get_links(s, l):
 		and len(link[1]) > 0 and link[0] != link[1]:
 			return link, get_links
 		parser_eprint("\"" + s "\" is not a valid link.", l)
+		exit()
 	else:
-		#start getting moves
-		return "\n", get_moves
+		#start getting turns
+		return "\n", get_turns
 
-# 4th part: get the moves from player, if any
-def get_moves(s, l):
-	#parse link and if it is valid return it
-	return move, get_moves
+# 4th part: get the turns from player, if any
+def get_turns(s, l):
+	spl = s.split(" ")
+	turn = []
+	i = 0
+	while i < len(spl) and len(spl[i]) > 3 and spl[i][0] == 'L':
+		move = []
+		mv = spl[1:].split('-')
+		if len(mv) != 2:
+			break
+		move.append(get_int(mv[0]))
+		move.append(mv[1])
+		if move[0] == None or move[1] == "":
+			break
+		turn.append(move)
+		i += 1
+	if !i or i < len(spl):
+		parser_eprint("\"" + s "\" contains invalid moves.", l)
+		exit()
+	return turn, get_turns
 
 def lemin_parser():
 	l = 1
@@ -89,8 +106,8 @@ def lemin_parser():
 				col.add_room(out, commands)
 			elif readf == get_links:
 				col.add_link(out, commands)
-			elif readf == get_moves:
-				col.add_move(out, commands)
+			elif readf == get_turns and out != '\n':
+				col.add_turn(out, commands)
 		lc += 1
 			
 	
