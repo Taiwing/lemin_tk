@@ -64,6 +64,22 @@ class colony:
             else:
                 self.turns.append(turn)
 
+    def cprint(self):
+        print("antn = " + str(self.antn))
+        print("size = " + str(self.size))
+        print("start: " + self.start)
+        print("end: " + self.end)
+        print("\nrooms:")
+        for room in self.rooms:
+            print("\"" + room + "\":")
+            self.rooms[room].rprint()
+        print("\nlinks:")
+        for link in self.links:
+            print(link)
+        print("\nturns:")
+        for turn in self.turns:
+            print(turn)
+
 class room:
     def __init__(self):
         # graphical coordinates if any
@@ -73,3 +89,8 @@ class room:
         self.links = []
         # command attributes ("start", "end", etc...)
         self.attrs = []
+
+    def rprint(self):
+        print("x = " + str(self.x) + "; y = " + str(self.y))
+        print("links: " + str(self.links))
+        print("attributes: " + str(self.attrs))

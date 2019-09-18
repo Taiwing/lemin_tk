@@ -3,3 +3,4 @@
 from parser import *
 
 col = lemin_parser()
+col.cprint()
