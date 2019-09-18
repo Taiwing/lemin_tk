@@ -22,33 +22,35 @@ class colony:
             exit()
         self.antn = antn
 
-    def add_room(self, room, commands):
-        if room[0] in self.rooms:
-            col_eprint("room \"" + room[0]  + "\" already defined.")
-        self.rooms[room[0]].x = room[1]
-        self.rooms[room[0]].y = room[2]
+    def add_room(self, r, commands):
+        if r[0] in self.rooms:
+            col_eprint("room \"" + r[0]  + "\" already defined.")
+        else:
+            self.rooms[r[0]] = room()
+        self.rooms[r[0]].x = r[1]
+        self.rooms[r[0]].y = r[2]
         for com in commands:
             # right now, this is ugly, do a function pointer dictionnary
             if com == "start":
-                self.start = room[0]
+                self.start = r[0]
                 self.end = "" if self.end == self.start else self.end
             elif com == "end":
-                self.end = room[0]
+                self.end = r[0]
                 self.start = "" if self.start == self.end else self.start
             else:
                 col_eprint("\"" + com + "\" unknown command")
 
     def add_link(self, link, commands):
-       commands.clear() #until link commands are a reality
-       if link[0] not in self.rooms or link[1] not in self.rooms:
-           col_eprint("\"" + link[0] + "-" + link[1] + "\" is invalid") 
-           exit()
-       elif link in self.links or link[::-1] in self.links:
-           col_eprint("\"" + link[0] + "-" + link[1] + "\" already exists") 
-       else:
-           self.links.append(link)
-           self.rooms[link[0]].links.append(link[1])
-           self.rooms[link[1]].links.append(link[0])
+        commands.clear() #until link commands are a reality
+        if link[0] not in self.rooms or link[1] not in self.rooms:
+            col_eprint("\"" + link[0] + "-" + link[1] + "\" is invalid") 
+            exit()
+        elif link in self.links or link[::-1] in self.links:
+            col_eprint("\"" + link[0] + "-" + link[1] + "\" already exists") 
+        else:
+            self.links.append(link)
+            self.rooms[link[0]].links.append(link[1])
+            self.rooms[link[1]].links.append(link[0])
 
     def add_turn(self, turn, commands):
         commands.clear() #until turn commands are added
