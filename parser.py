@@ -105,5 +105,6 @@ def lemin_parser():
                 col.add_link(out, commands)
             elif readf == get_turns and out != '\n':
                 col.add_turn(out, commands)
+            commands.clear()
         lc += 1
     return col

@@ -14,6 +14,10 @@ class colony:
         self.start = ""
         self.end = ""
         self.turns = []
+        self.minx = None
+        self.maxx = None
+        self.miny = None
+        self.maxy = None
 
     def set_antn(self, antn, commands):
         commands.clear() #until antn commands are added if any
@@ -28,15 +32,25 @@ class colony:
         else:
             self.rooms[r[0]] = room()
         self.rooms[r[0]].x = r[1]
+        if self.minx == None or r[1] < self.minx:
+            self.minx = r[1]
+        if self.maxx == None or r[1] > self.maxx:
+            self.maxx = r[1]
         self.rooms[r[0]].y = r[2]
+        if self.miny == None or r[2] < self.miny:
+            self.miny = r[2]
+        if self.maxy == None or r[2] > self.maxy:
+            self.maxy = r[2]
         for com in commands:
             # right now, this is ugly, do a function pointer dictionnary
             if com == "start":
                 self.start = r[0]
                 self.end = "" if self.end == self.start else self.end
+                self.rooms[r[0]].attrs.append(com)
             elif com == "end":
                 self.end = r[0]
                 self.start = "" if self.start == self.end else self.start
+                self.rooms[r[0]].attrs.append(com)
             else:
                 col_eprint("\"" + com + "\" unknown command")
 
@@ -65,20 +79,25 @@ class colony:
                 self.turns.append(turn)
 
     def cprint(self):
-        print("antn = " + str(self.antn))
-        print("size = " + str(self.size))
-        print("start: " + self.start)
-        print("end: " + self.end)
-        print("\nrooms:")
+        ret = "antn = " + str(self.antn) + "\n"\
+        + "size = " + str(self.size) + "\n"\
+        + "start: " + self.start + "\n"\
+        + "end: " + self.end + "\n"\
+        + "minx = " + str(self.minx) + "\n"\
+        + "maxx = " + str(self.maxx) + "\n"\
+        + "miny = " + str(self.miny) + "\n"\
+        + "maxy = " + str(self.maxy) + "\n"\
+        + "\nrooms:\n"
         for room in self.rooms:
-            print("\"" + room + "\":")
-            self.rooms[room].rprint()
-        print("\nlinks:")
+            ret += "\"" + room + "\":\n"
+            ret += self.rooms[room].rprint()
+        ret += "\nlinks:\n"
         for link in self.links:
-            print(link)
-        print("\nturns:")
+            ret += str(link) + "\n"
+        ret += "\nturns:\n"
         for turn in self.turns:
-            print(turn)
+            ret += str(turn) + "\n"
+        return ret
 
 class room:
     def __init__(self):
@@ -91,6 +110,7 @@ class room:
         self.attrs = []
 
     def rprint(self):
-        print("x = " + str(self.x) + "; y = " + str(self.y))
-        print("links: " + str(self.links))
-        print("attributes: " + str(self.attrs))
+        ret = "x = " + str(self.x) + "; y = " + str(self.y) + "\n"
+        ret += "links: " + str(self.links) + "\n"
+        ret += "attributes: " + str(self.attrs) + "\n"
+        return ret
