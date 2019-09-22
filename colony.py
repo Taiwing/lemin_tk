@@ -99,11 +99,28 @@ class colony:
             ret += str(turn) + "\n"
         return ret
 
+    def normalize_coords(self):
+        maxx = self.maxx - self.minx
+        maxy = self.maxy - self.miny
+        midy = maxy / 2
+        for r in self.rooms:
+            # make orignal coordinates 0,0    
+            self.rooms[r].x = self.rooms[r].x - self.minx
+            self.rooms[r].y = self.rooms[r].y - self.miny
+            # invert the y axis
+            dist = midy - self.rooms[r].y
+            self.rooms[r].y = midy + dist
+        self.maxx = maxx
+        self.maxy = maxy
+        self.minx = 0
+        self.miny = 0
+
 class room:
     def __init__(self):
         # graphical coordinates if any
         self.x = -1
         self.y = -1
+        self.drawn = 0
         # links to other rooms
         self.links = []
         # command attributes ("start", "end", etc...)
