@@ -106,14 +106,10 @@ class colony:
     def normalize_coords(self):
         maxx = self.maxx - self.minx
         maxy = self.maxy - self.miny
-        midy = maxy / 2
         for r in self.rooms:
             # make orignal coordinates 0,0    
             self.rooms[r].x = self.rooms[r].x - self.minx
             self.rooms[r].y = self.rooms[r].y - self.miny
-            # invert the y axis
-            dist = midy - self.rooms[r].y
-            self.rooms[r].y = midy + dist
         self.maxx = maxx
         self.maxy = maxy
         self.minx = 0
