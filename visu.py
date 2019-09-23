@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from tkinter import *
+from utils import *
+from time import *
 
 class vdata:
     def __init__(self):
@@ -20,6 +22,9 @@ class vdata:
         self.grid_h = col.maxy + 1
         self.side = min(self.screen_w / (self.grid_w + 2),\
         self.screen_h / (self.grid_h + 2))
+        if self.side < 10:
+            eprint("error: map too big for the screen")
+            exit()
         self.orig_x = (self.screen_w - (self.grid_w * self.side)) / 2
         self.orig_y = (self.screen_h - (self.grid_h * self.side)) / 2
     
@@ -40,8 +45,7 @@ def draw_grid(col, vda, can):
 
 def draw_room(vda, can, x, y):
         can.create_oval(x - (vda.side / 4), y - (vda.side / 4),\
-        x + (vda.side / 4), y + (vda.side / 4),\
-        fill="blue", outline="blue", width=2)
+        x + (vda.side / 4), y + (vda.side / 4), fill="blue")
 
 def draw_links(r, col, vda, can, x, y):
     for l in col.rooms[r].links:
@@ -56,6 +60,51 @@ def draw_map(col, vda, can):
         draw_room(vda, can, x, y)
         col.rooms[r].drawn = 1
     can.pack()
+
+def init_ants(col, vda, can):
+    for i in range(col.antn):
+        x, y = vda.get_pos(col.rooms[col.start].x, col.rooms[col.start].y)
+        ant = can.create_oval(x - (vda.side / 8), y - (vda.side / 8),\
+        x + (vda.side / 8), y + (vda.side / 8), fill="red")
+        col.ants.append(ant)
+    can.pack()
+
+def move_ants(col, vda, can):
+    # array of coordinates plus increment values
+    xy = []
+    framec = 100
+    for i in range(col.antn):
+        x1, y1 = vda.get_pos(col.rooms[col.game[col.turn][i]].x,\
+        col.rooms[col.game[col.turn][i]].y)
+        x1 -= (vda.side / 8)
+        y1 -= (vda.side / 8)
+        cur = can.coords(col.ants[i])
+        ix = (x1 - cur[0]) / framec
+        iy = (y1 - cur[1]) / framec
+        xy.append([cur[0], cur[1], cur[2], cur[3], ix, iy])
+    for i in range(framec):
+        for j in range(col.antn):
+            if i < (framec - 1):
+                can.coords(col.ants[j], xy[j][0] + (xy[j][4] * i),\
+                xy[j][1] + (xy[j][5] * i), xy[j][2] + (xy[j][4] * i),\
+                xy[j][3] + (xy[j][5] * i))
+            else:
+                x1, y1 = vda.get_pos(col.rooms[col.game[col.turn][j]].x,\
+                col.rooms[col.game[col.turn][j]].y)
+                x2 = x1 + (vda.side / 8)
+                y2 = y1 + (vda.side / 8)
+                x1 -= (vda.side / 8)
+                y1 -= (vda.side / 8)
+                can.coords(col.ants[j], x1, y1, x2, y2)
+        can.pack()
+        can.update()
+
+def play_game(col, vda, can):
+    col.turn = 1
+    while col.turn < len(col.game):
+        move_ants(col, vda, can)
+        sleep(0.3)
+        col.turn += 1
 
 def run_visu(col):
     win = Tk()
@@ -72,4 +121,8 @@ def run_visu(col):
 
     # Map
     draw_map(col, vda, can)
-    win.mainloop()
+
+    init_ants(col, vda, can)
+    can.update()
+    play_game(col, vda, can)
+   # win.mainloop()

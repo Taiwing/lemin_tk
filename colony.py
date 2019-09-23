@@ -20,6 +20,7 @@ class colony:
         self.maxx = None
         self.miny = None
         self.maxy = None
+        self.ants = []
 
     def set_antn(self, antn, commands):
         commands.clear() #until antn commands are added if any
@@ -119,7 +120,7 @@ class colony:
         self.miny = 0
 
     def init_game(self):
-        self.game = [["start"] * self.antn for i in range(len(self.turns) + 1)]
+        self.game = [[self.start]* self.antn for i in range(len(self.turns) + 1)]
         for i in range(len(self.turns)):
             for j in range(self.antn):
                 self.game[i + 1][j] = self.game[i][j]
