@@ -46,8 +46,9 @@ class vdata:
         self.draw_map()
         # this shit is called before the game is even launched, whyyyy ?
         self.draw_ants(turn=self.col.turn - 1 if self.col.turn > 0 else 0)
-        self.get_steps()
-        self.draw_step()
+        if self.col.turn < len(self.col.game):
+            self.get_steps()
+            self.draw_step()
         self.can.update()
 
     def build_canvas_grid(self, width, height):
@@ -207,11 +208,10 @@ class vdata:
             self.can.coords(self.ants[i], xy[0], xy[1], xy[2], xy[3])
 
 def play_game(col, vda):
-    col.turn = 1
-    while col.turn < len(col.game):
+    if col.turn < len(col.game):
         vda.move_ants()
-        sleep(0.3)
         col.turn += 1
+        vda.win.after(300, play_game, col, vda)
 
 def run_visu(col):
     # init visual data
@@ -223,4 +223,8 @@ def run_visu(col):
     vda.draw_map()
     vda.draw_ants()
     vda.can.update()
-    play_game(col, vda)
+
+    # main loop
+    col.turn = 1
+    vda.win.after(300, play_game, col, vda)
+    vda.win.mainloop()
