@@ -19,6 +19,7 @@ class vdata:
         self.win = Tk()
         self.can = None
         # shapes
+        self.grid = []
         self.ants = []
         self.links = []
         self.rooms = {}
@@ -29,6 +30,8 @@ class vdata:
         self.ant_color = "red"
         # number of frames by ant movement (speed)
         self.framec = 100
+        # print grid option
+        self.print_grid = True
 
     def init_screen(self, col):
         self.grid_w = col.maxx + 1
@@ -66,8 +69,30 @@ class vdata:
         x2, y2 = self.grid_to_graphical(g_x2, g_y2)
         return x1, y1, x2, y2
 
+    # grid
+    def delete_grid(self):
+        for bar in self.grid:
+            self.can.delete(bar)
+        self.grid.clear()
+
+    def draw_grid(self):
+        self.delete_grid()
+        for i in range(0, self.grid_w + 1):
+            bar = self.can.create_line(self.orig_x + (self.side * i),\
+            self.orig_y, self.orig_x + (self.side * i),\
+            self.orig_y + (self.grid_h * self.side)) 
+            self.grid.append(bar)
+        for i in range(0, self.grid_h + 1):
+            bar = self.can.create_line(self.orig_x,\
+            self.orig_y + (self.side * i),\
+            self.orig_x + (self.grid_w * self.side),\
+            self.orig_y + (self.side * i))
+            self.grid.append(bar)
+        self.can.pack()
+
     # delete the shapes of the game
     def delete_map(self):
+        self.delete_grid()
         for r in self.rooms:
             self.can.delete(self.rooms[r])
         self.rooms.clear()
@@ -97,6 +122,8 @@ class vdata:
 
     def draw_map(self, col):
         self.delete_map()
+        if self.print_grid:
+            self.draw_grid()
         for r in col.rooms:
             self.draw_links(r, col)
             self.draw_room(r, col)
@@ -145,14 +172,6 @@ class vdata:
             self.can.update()
         steps.clear()
 
-def draw_grid(col, vda, can):
-    for i in range(0, vda.grid_w + 1):
-        can.create_line(vda.orig_x + (vda.side * i), vda.orig_y,\
-        vda.orig_x + (vda.side * i), vda.orig_y + (vda.grid_h * vda.side)) 
-    for i in range(0, vda.grid_h + 1):
-        can.create_line(vda.orig_x, vda.orig_y + (vda.side * i),\
-        vda.orig_x + (vda.grid_w * vda.side), vda.orig_y + (vda.side * i))
-    can.pack()
 
 def play_game(col, vda):
     col.turn = 1
@@ -166,9 +185,6 @@ def run_visu(col):
     vda = vdata()
     col.normalize_coords()
     vda.init_screen(col)
-
-    # Grid
-#    draw_grid(col, vda, can)
 
     # draw game 
     vda.draw_map(col)
