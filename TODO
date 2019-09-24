@@ -1,0 +1,8 @@
+- display the room name when hovering over it
+- set different colors for the start and end rooms
+- alternative start concentric view for big maps (end is on the edges)
+- the map editor (only with classic view)
+- a map generator
+- make it possible to run lemin_tk without providing it a map and to select
+  the map and solver from a menu
+- a checker to see if the solution is valid
