@@ -1,5 +1,6 @@
 - display the room name when hovering over it
 - set different colors for the start and end rooms
+- add a settings menu and a settings file to tweak lemin_tk's behavior
 - alternative start concentric view for big maps (end is on the edges)
 - the map editor (only with classic view)
 - a map generator
