@@ -20,7 +20,6 @@ class colony:
         self.maxx = None
         self.miny = None
         self.maxy = None
-        self.ants = []
 
     def set_antn(self, antn, commands):
         commands.clear() #until antn commands are added if any
@@ -127,10 +126,9 @@ class colony:
 
 class room:
     def __init__(self):
-        # graphical coordinates if any
+        # grid coordinates
         self.x = -1
         self.y = -1
-        self.drawn = 0
         # links to other rooms
         self.links = []
         # command attributes ("start", "end", etc...)
