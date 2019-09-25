@@ -73,9 +73,6 @@ class vdata:
     
     def play_pause(self, event):
         self.play = True if self.play == False else False
-
-        print("Pause: " if self.play == False else "Play: ", end='')
-        print("self.step: ", self.step)
 #        self.delay = 0
 
     def init_actions(self):
