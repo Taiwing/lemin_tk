@@ -151,11 +151,11 @@ class vdata:
                 self.links.append(link)
 
     def draw_room(self, r):
-            x1, y1, x2, y2 = self.room_coords(self.col.rooms[r].x, self.col.rooms[r].y)
-            color = self.start_room_color if self.col.start == r\
-            else self.end_room_color if self.col.end == r else self.room_color
-            room = self.can.create_oval(x1, y1, x2, y2, fill=color)
-            self.rooms[r] = room
+        x1, y1, x2, y2 = self.room_coords(self.col.rooms[r].x, self.col.rooms[r].y)
+        color = self.start_room_color if self.col.start == r\
+        else self.end_room_color if self.col.end == r else self.room_color
+        room = self.can.create_oval(x1, y1, x2, y2, fill=color)
+        self.rooms[r] = room
 
     def draw_map(self):
         self.delete_map()
