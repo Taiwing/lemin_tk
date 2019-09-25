@@ -26,6 +26,8 @@ class vdata:
         # colors
         self.background_color = "DodgerBlue3"
         self.room_color = "blue"
+        self.start_room_color = "purple4"
+        self.end_room_color = "DarkGoldenrod1"
         self.link_color = "black"
         self.ant_color = "red"
         # number of frames by ant movement (speed)
@@ -150,7 +152,9 @@ class vdata:
 
     def draw_room(self, r):
             x1, y1, x2, y2 = self.room_coords(self.col.rooms[r].x, self.col.rooms[r].y)
-            room = self.can.create_oval(x1, y1, x2, y2, fill=self.room_color)
+            color = self.start_room_color if self.col.start == r\
+            else self.end_room_color if self.col.end == r else self.room_color
+            room = self.can.create_oval(x1, y1, x2, y2, fill=color)
             self.rooms[r] = room
 
     def draw_map(self):
