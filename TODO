@@ -1,4 +1,5 @@
-- allow for play/pause/back commands during resolution (also adjust speed)
+- allow for back/next/reset commands during resolution
+- adjust speed
 - add a settings menu and a settings file to tweak lemin_tk's behavior
 - alternative start concentric view for big maps (end is on the edges)
 - the map editor (only with classic view)

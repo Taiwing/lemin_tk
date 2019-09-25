@@ -33,6 +33,9 @@ class vdata:
         self.ant_color = "red"
         # number of frames by ant movement (speed)
         self.framec = 100
+        # time between loops (ms)
+        self.default_delay = 300
+        self.delay = self.default_delay
         # current coordinates and x,y increments for each ant
         self.steps = []
         self.step = 0
@@ -40,6 +43,8 @@ class vdata:
         self.print_grid = True
         # copy of colony class for convenience
         self.col = col
+        # play the game
+        self.play = True
 
     def scale_canvas(self, event):
         self.can.pack(side=TOP, fill=BOTH, expand=1)
@@ -65,6 +70,17 @@ class vdata:
             return 1
         else:
             return 0
+    
+    def play_pause(self, event):
+        self.play = True if self.play == False else False
+
+        print("Pause: " if self.play == False else "Play: ", end='')
+        print("self.step: ", self.step)
+#        self.delay = 0
+
+    def init_actions(self):
+        self.can.bind("<Configure>", self.scale_canvas)
+        self.win.bind("<space>", self.play_pause)
 
     def init_screen(self):
         self.grid_w = self.col.maxx + 1
@@ -83,7 +99,7 @@ class vdata:
         self.can = Canvas(self.win, width=self.screen_w, height=self.screen_h,\
         bg=self.background_color)
         self.can.pack(side=TOP, fill=BOTH, expand=1)
-        self.can.bind("<Configure>", self.scale_canvas)
+        self.init_actions()
     
     # compute the coordinates to draw the game from grid coordinates
     def grid_to_graphical(self, g_x, g_y):
@@ -184,7 +200,11 @@ class vdata:
         for i in range(self.col.antn):
             xy = self.ant_coords(self.col.rooms[self.col.game[self.col.turn][i]].x,\
             self.col.rooms[self.col.game[self.col.turn][i]].y)
-            cur = self.can.coords(self.ants[i])
+            if self.step > self.framec or self.col.turn == 0:
+                cur = self.can.coords(self.ants[i])
+            else:
+                cur = self.ant_coords(self.col.rooms[self.col.game[self.col.turn-1][i]].x,\
+                self.col.rooms[self.col.game[self.col.turn-1][i]].y)
             ix = (xy[0] - cur[0]) / self.framec
             iy = (xy[1] - cur[1]) / self.framec
             self.steps.append([cur[0], cur[1], cur[2], cur[3], ix, iy])
@@ -201,11 +221,13 @@ class vdata:
     def move_ants(self):
         # array of coordinates plus increment values
         self.get_steps()
-        self.step = 0
+        self.step = 0 if self.step > self.framec else self.step
         while self.step <= self.framec:
             self.draw_step()
             self.can.update()
             self.step += 1
+            if self.play == False:
+                return
         for i in range(self.col.antn):
             # fix ant precisely on the node
             xy = self.ant_coords(self.col.rooms[self.col.game[self.col.turn][i]].x,\
@@ -214,9 +236,11 @@ class vdata:
 
 def play_game(col, vda):
     if col.turn < len(col.game):
-        vda.move_ants()
-        col.turn += 1
-        vda.win.after(300, play_game, col, vda)
+        if vda.play == True:
+            vda.move_ants()
+        if vda.step > vda.framec:
+            col.turn += 1
+        vda.win.after(vda.delay, play_game, col, vda)
 
 def run_visu(col):
     # init visual data
@@ -231,5 +255,5 @@ def run_visu(col):
 
     # main loop
     col.turn = 1
-    vda.win.after(300, play_game, col, vda)
+    vda.win.after(vda.delay, play_game, col, vda)
     vda.win.mainloop()
