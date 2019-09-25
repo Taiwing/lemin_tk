@@ -204,7 +204,6 @@ class vdata:
         self.step = 0
         while self.step <= self.framec:
             self.draw_step()
-            self.can.pack()
             self.can.update()
             self.step += 1
         for i in range(self.col.antn):
