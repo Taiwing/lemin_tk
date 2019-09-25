@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from tkinter import *
+from tooltip import *
 from utils import *
 from time import *
 
@@ -154,7 +155,8 @@ class vdata:
         x1, y1, x2, y2 = self.room_coords(self.col.rooms[r].x, self.col.rooms[r].y)
         color = self.start_room_color if self.col.start == r\
         else self.end_room_color if self.col.end == r else self.room_color
-        room = self.can.create_oval(x1, y1, x2, y2, fill=color)
+        room = self.can.create_oval(x1, y1, x2, y2, fill=color, tags=r)
+        CreateShapeToolTip(self.can, room, r)
         self.rooms[r] = room
 
     def draw_map(self):
