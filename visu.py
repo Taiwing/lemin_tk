@@ -44,7 +44,7 @@ class vdata:
         # copy of colony class for convenience
         self.col = col
         # play the game
-        self.play = True
+        self.play = False
 
     def scale_canvas(self, event):
         self.can.pack(side=TOP, fill=BOTH, expand=1)
@@ -70,14 +70,56 @@ class vdata:
             return 1
         else:
             return 0
+
+    def debug(self, event):
+        print("self.col.turn:", self.col.turn, "/", len(self.col.game))
+        print("self.play:", "True" if self.play == True else "False")
+        print("self.step:", self.step)
     
     def play_pause(self, event):
         self.play = True if self.play == False else False
-#        self.delay = 0
+
+    def go_to_end(self, event):
+        self.play = False
+        self.step = 0
+        self.col.turn = len(self.col.game)
+        self.draw_ants(turn=self.col.turn - 1)
+        self.can.update()
+
+    def reset(self, event):
+        self.play = False
+        self.step = 0
+        self.col.turn = 1
+        self.draw_ants(turn=0)
+        self.can.update()
+
+    def back_one_turn(self, event):
+        if self.step == 0 and self.col.turn > 0:
+            self.col.turn -= 1
+        self.play = False
+        self.step = 0
+        if self.col.turn > 1:
+            self.draw_ants(turn=self.col.turn - 1)
+            self.can.update()
+        else:
+            self.reset(event)
+    
+    def forward_one_turn(self, event):
+        self.play = False
+        self.step = 0
+        if self.col.turn < len(self.col.game):
+            self.draw_ants(turn=self.col.turn)
+            self.can.update()
+            self.col.turn += 1
 
     def init_actions(self):
         self.can.bind("<Configure>", self.scale_canvas)
         self.win.bind("<space>", self.play_pause)
+        self.win.bind("<Left>", self.back_one_turn)
+        self.win.bind("<Right>", self.forward_one_turn)
+        self.win.bind("r", self.reset)
+        self.win.bind("e", self.go_to_end)
+        self.win.bind("d", self.debug)
 
     def init_screen(self):
         self.grid_w = self.col.maxx + 1
@@ -222,9 +264,9 @@ class vdata:
         while self.step <= self.framec:
             self.draw_step()
             self.can.update()
-            self.step += 1
             if self.play == False:
                 return
+            self.step += 1
         for i in range(self.col.antn):
             # fix ant precisely on the node
             xy = self.ant_coords(self.col.rooms[self.col.game[self.col.turn][i]].x,\
@@ -232,12 +274,15 @@ class vdata:
             self.can.coords(self.ants[i], xy[0], xy[1], xy[2], xy[3])
 
 def play_game(col, vda):
+
+#    vda.debug(None) # DEBUG
+
     if col.turn < len(col.game):
         if vda.play == True:
             vda.move_ants()
         if vda.step > vda.framec:
             col.turn += 1
-        vda.win.after(vda.delay, play_game, col, vda)
+    vda.win.after(vda.delay, play_game, col, vda)
 
 def run_visu(col):
     # init visual data
