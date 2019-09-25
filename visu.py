@@ -94,7 +94,8 @@ class vdata:
         self.can.update()
 
     def back_one_turn(self, event):
-        if self.step == 0 and self.col.turn > 0:
+        if (self.step == 0 and self.col.turn > 0)\
+        or self.col.turn == len(self.col.game):
             self.col.turn -= 1
         self.play = False
         self.step = 0
@@ -112,6 +113,24 @@ class vdata:
             self.can.update()
             self.col.turn += 1
 
+    def speed_up(self, event):
+        if self.framec > 10:
+            self.framec -= 10
+            if self.play == True:
+                if self.col.turn < len(self.col.game):
+                    self.get_steps()
+                self.step = self.step * (self.framec / (self.framec + 10))
+                self.draw_step()
+
+    def speed_down(self, event):
+        if self.framec < 500:
+            self.framec += 10
+            if self.play == True:
+                if self.col.turn < len(self.col.game):
+                    self.get_steps()
+                self.step = self.step * (self.framec / (self.framec - 10))
+                self.draw_step()
+
     def init_actions(self):
         self.can.bind("<Configure>", self.scale_canvas)
         self.win.bind("<space>", self.play_pause)
@@ -119,6 +138,8 @@ class vdata:
         self.win.bind("<Right>", self.forward_one_turn)
         self.win.bind("r", self.reset)
         self.win.bind("e", self.go_to_end)
+        self.win.bind("<Up>", self.speed_up)
+        self.win.bind("<Down>", self.speed_down)
         self.win.bind("d", self.debug)
 
     def init_screen(self):
@@ -282,6 +303,8 @@ def play_game(col, vda):
             vda.move_ants()
         if vda.step > vda.framec:
             col.turn += 1
+    else:
+        vda.play = False
     vda.win.after(vda.delay, play_game, col, vda)
 
 def run_visu(col):
