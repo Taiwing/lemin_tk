@@ -1,5 +1,14 @@
-- add a settings menu and a settings file to tweak lemin_tk's behavior
+- "flatten" coordinates of the map if too big for the screen 
+  1. build a grid that allows every room to be seperately represented on
+  the screen (aka, grid_h * grid_w >= nbr_rooms) and change the coordinates
+  to match the new grid (put them proportionnaly at the same place in the new
+  grid). if two rooms get the same x;y coordinates from this just place them
+  elsewhere on the grid (just next to it, or ideally where it is most empty)
+  2. if this does not work, do the same but only represent used rooms
+  3. if this also fails, just print as is without caring about room collisions
+  4. else just get the fuck out mate, you've done enough
 - alternative start concentric view for big maps (end is on the edges)
+- add a settings menu and a settings file to tweak lemin_tk's behavior
 - the map editor (only with classic view)
 - a map generator
 - make it possible to run lemin_tk without providing it a map and to select
