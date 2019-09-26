@@ -41,7 +41,7 @@ class vdata:
         self.ant_color = "red"
         # number of frames by ant movement (speed)
         self.framec = 100
-        # wait time (mainloop count)
+        # wait time (ms)
         self.delay = 300
         self.waitc = 0
         # current coordinates and x,y increments for each ant
@@ -330,7 +330,6 @@ class vdata:
         self.ants.clear()
 
     def play_game(self):
-#        vda.debug(None) # DEBUG
         self.async_actions()
         if self.play == True and self.update != U_WAIT:
             if self.col.turn < len(self.col.game) - 1:
