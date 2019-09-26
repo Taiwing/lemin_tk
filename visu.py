@@ -11,27 +11,35 @@ U_REFRESH = 2
 U_MOVE = 3
 U_REDRAW = 4
 
+# graphical constants
+G_SIDE_MIN = 10
+G_SIDE_DEF = 50
+G_SCREEN_DIV = 2 # use half the screen by default
+
 class vdata:
     def __init__(self, col):
-        # grid data
-        self.grid_w = 0
-        self.grid_h = 0
-        # screen data
-        self.screen_w = 0
-        self.screen_h = 0
+        # screen
+        self.win = Tk()
+        self.can = None
+        self.screen_width = self.win.winfo_screenwidth()
+        self.screen_height = self.win.winfo_screenheight()
+        # canvas data
+        self.canvas_w = 0
+        self.canvas_h = 0
         self.redraw_w = 0
         self.redraw_h = 0
         self.side = 0
         self.orig_x = 0
         self.orig_y = 0
-        # screen
-        self.win = Tk()
-        self.can = None
+        # grid data
+        self.grid_w = col.maxx + 1
+        self.grid_h = col.maxy + 1
         # shapes
         self.grid = []
         self.ants = []
         self.links = []
         self.rooms = {}
+        self.nbr_rooms = len(col.rooms)
         # colors
         self.background_color = "DodgerBlue3"
         self.room_color = "blue"
@@ -58,37 +66,40 @@ class vdata:
         # asynchronous actions stack (FIFO)
         self.stack = []
 
-    def init_screen(self):
-        self.grid_w = self.col.maxx + 1
-        self.grid_h = self.col.maxy + 1
-        self.screen_w = self.win.winfo_screenwidth() / 2
-        self.screen_h = self.win.winfo_screenheight() / 2
-        # try to resize the grid to a minimum if it does not fit the screen
-        if self.build_canvas_grid(self.screen_w, self.screen_h):
-            self.screen_w = (self.grid_w + 2) * 10
-            self.screen_h = (self.grid_h + 2) * 10
-            self.build_canvas_grid(self.screen_w, self.screen_h)
-            if self.screen_w > self.win.winfo_screenwidth()\
-            or self.screen_h > self.win.winfo_screenheight():
-                eprint("error: map too big for the screen")
-                exit()
-        self.can = Canvas(self.win, width=self.screen_w, height=self.screen_h,\
+    def init_canvas(self):
+        grid_w_max = (self.screen_width / G_SIDE_MIN) - 2
+        grid_h_max = (self.screen_height / G_SIDE_MIN) - 2
+        if grid_w_max * grid_h_max < self.nbr_rooms:
+            eprint("error: map too big for the screen")
+            exit()
+#        elif grid_w_max < self.grid_w or grid_h_max < self.grid_h:
+#            self.compress_coordinates(grid_w_max, grid_h_max) # TODO
+        else:
+            self.build_default_grid()
+        win_w_min = (self.grid_w + 2) * G_SIDE_MIN
+        win_h_min = (self.grid_h + 2) * G_SIDE_MIN
+        self.win.minsize(win_w_min, win_h_min)
+
+    def build_default_grid(self):
+        self.canvas_w = self.screen_width / G_SCREEN_DIV 
+        self.canvas_h = self.screen_height / G_SCREEN_DIV 
+        if self.build_canvas_grid():
+            # if default window is not big enough
+            self.canvas_w = (self.grid_w + 2) * G_SIDE_MIN
+            self.canvas_h = (self.grid_h + 2) * G_SIDE_MIN
+            self.build_canvas_grid()
+        self.can = Canvas(self.win, width=self.canvas_w, height=self.canvas_h,\
         bg=self.background_color)
         self.can.pack(side=TOP, fill=BOTH, expand=1)
         self.init_actions()
         self.can.update()
 
-    def build_canvas_grid(self, width, height):
-        self.screen_w = width
-        self.screen_h = height
-        self.side = min(self.screen_w / (self.grid_w + 2),\
-        self.screen_h / (self.grid_h + 2))
-        self.orig_x = (self.screen_w - (self.grid_w * self.side)) / 2
-        self.orig_y = (self.screen_h - (self.grid_h * self.side)) / 2
-        if self.side < 10:
-            return 1
-        else:
-            return 0
+    def build_canvas_grid(self):
+        self.side = min(self.canvas_w / (self.grid_w + 2),\
+        self.canvas_h / (self.grid_h + 2))
+        self.orig_x = (self.canvas_w - (self.grid_w * self.side)) / 2
+        self.orig_y = (self.canvas_h - (self.grid_h * self.side)) / 2
+        return 1 if self.side < G_SIDE_MIN else 0
 
     def init_actions(self):
         self.can.bind("<Configure>", self.configure_handler)
@@ -132,8 +143,8 @@ class vdata:
 
     def scale_canvas(self):
         self.update = U_REDRAW
-        self.screen_w = self.redraw_w
-        self.screen_h = self.redraw_h
+        self.canvas_w = self.redraw_w
+        self.canvas_h = self.redraw_h
 
     def play_pause(self):
         self.play = True if self.play == False else False
@@ -192,9 +203,7 @@ class vdata:
         print("self.stack:", self.stack)
 
     def redraw(self):
-        if self.build_canvas_grid(self.screen_w, self.screen_h):
-            eprint("error: map too big for the screen")
-            exit()
+        self.build_canvas_grid()
         self.draw_map()
         self.draw_ants()
         if self.step > 0:
@@ -384,9 +393,9 @@ class vdata:
 
 def run_visu(col):
     # init visual data
-    vda = vdata(col)
     col.normalize_coords()
-    vda.init_screen()
+    vda = vdata(col)
+    vda.init_canvas()
 
     # main loop
     vda.win.after(0, vda.play_game)
