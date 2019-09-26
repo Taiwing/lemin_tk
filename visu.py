@@ -67,18 +67,71 @@ class vdata:
         self.stack = []
 
     def init_canvas(self):
-        grid_w_max = (self.screen_width / G_SIDE_MIN) - 2
-        grid_h_max = (self.screen_height / G_SIDE_MIN) - 2
+        grid_w_max = (self.screen_width // G_SIDE_MIN) - 2
+        grid_h_max = (self.screen_height // G_SIDE_MIN) - 2
         if grid_w_max * grid_h_max < self.nbr_rooms:
             eprint("error: map too big for the screen")
             exit()
-#        elif grid_w_max < self.grid_w or grid_h_max < self.grid_h:
-#            self.compress_coordinates(grid_w_max, grid_h_max) # TODO
-        else:
-            self.build_default_grid()
+        elif grid_w_max < self.grid_w or grid_h_max < self.grid_h:
+            self.compress_coordinates(grid_w_max, grid_h_max)
+        self.build_default_grid()
         win_w_min = (self.grid_w + 2) * G_SIDE_MIN
         win_h_min = (self.grid_h + 2) * G_SIDE_MIN
         self.win.minsize(win_w_min, win_h_min)
+
+    def compress_coordinates(self, grid_w_max, grid_h_max):
+        scale_w = grid_w_max / self.grid_w
+        scale_h = grid_h_max / self.grid_h
+        self.grid_w = grid_w_max 
+        self.grid_h = grid_h_max
+        grid = [[0] * self.grid_h for i in range(self.grid_w)] 
+        for r in self.col.rooms:
+            x = int(self.col.rooms[r].x * scale_w)
+            y = int(self.col.rooms[r].y * scale_h)
+            if grid[x][y] != 0:
+                x, y = self.move_room(x, y, grid, 1)
+            grid[x][y] = 1
+            self.col.rooms[r].x = x
+            self.col.rooms[r].y = y
+
+    def move_room(self, x, y, grid, dist):
+        start_y = y - dist
+        start_x = x - dist
+        end_y = y + dist
+        end_x = x + dist
+        if start_y < 0 and start_x < 0\
+        and end_y > self.grid_h - 1 and end_x > self.grid_w - 1:
+            eprint("error: no place found in grid")
+            exit()
+        ty = start_y 
+        tx = max(0, start_x)
+        if ty >= 0:
+            while tx < end_x + 1 and tx < self.grid_w:
+                if grid[tx][ty] == 0:
+                    return tx, ty
+                tx += 1
+        ty = max(0, start_y)
+        tx = end_x
+        if tx < self.grid_w:
+            while ty < end_y + 1 and ty < self.grid_h:
+                if grid[tx][ty] == 0:
+                    return tx, ty
+                ty += 1
+        ty = end_y
+        tx = min(self.grid_w - 1, end_x)
+        if ty < self.grid_h:
+            while tx >= start_x and tx >= 0:
+                if grid[tx][ty] == 0:
+                    return tx, ty
+                tx -= 1
+        ty = min(self.grid_h - 1, end_y)
+        tx = start_x
+        if tx >= 0:
+            while ty >= start_y and ty >= 0:
+                if grid[tx][ty] == 0:
+                    return tx, ty
+                ty -= 1
+        return self.move_room(x, y, grid, dist + 1)
 
     def build_default_grid(self):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 
