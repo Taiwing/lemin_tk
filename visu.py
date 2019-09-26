@@ -54,7 +54,7 @@ class vdata:
         # play the game
         self.play = False
         # update state
-        self.update = U_REDRAW
+        self.update = U_NONE
         # asynchronous actions stack (FIFO)
         self.stack = []
 
@@ -76,6 +76,7 @@ class vdata:
         bg=self.background_color)
         self.can.pack(side=TOP, fill=BOTH, expand=1)
         self.init_actions()
+        self.can.update()
 
     def build_canvas_grid(self, width, height):
         self.screen_w = width
@@ -191,7 +192,6 @@ class vdata:
         print("self.stack:", self.stack)
 
     def redraw(self):
-        # this shit is called before the game is even launched, whyyyy ?
         if self.build_canvas_grid(self.screen_w, self.screen_h):
             eprint("error: map too big for the screen")
             exit()
