@@ -11,19 +11,31 @@ U_REFRESH = 2
 U_MOVE = 3
 U_REDRAW = 4
 
-# graphical constants
+# graphical constants # TODO: config structure
+G_PRINT_GRID = True
 G_SIDE_MIN = 10
-G_SIDE_DEF = 50
+G_SIDE_DEF = 50 # not used yet
 G_SCREEN_DIV = 2 # use half the screen by default
+G_FRAMEC_MIN = 10
+G_FRAMEC_MAX = 500
+G_FRAMEC_DEF = 100
+G_FRAMEC_STEP = 10 # increment or decrement speed by this value
+G_DELAY_DEF = 300 # wait time at each room
+BACKGROUND_COLOR = "DodgerBlue3"
+ROOM_COLOR = "blue"
+START_ROOM_COLOR = "purple4"
+END_ROOM_COLOR = "DarkGoldenrod1"
+LINK_COLOR = "black"
+ANT_COLOR = "red"
 
 class vdata:
     def __init__(self, col):
-        # screen
+        # window data
         self.win = Tk()
-        self.can = None
         self.screen_width = self.win.winfo_screenwidth()
         self.screen_height = self.win.winfo_screenheight()
         # canvas data
+        self.can = None
         self.canvas_w = 0
         self.canvas_h = 0
         self.redraw_w = 0
@@ -32,44 +44,55 @@ class vdata:
         self.orig_x = 0
         self.orig_y = 0
         # grid data
-        self.grid_w = col.maxx + 1
-        self.grid_h = col.maxy + 1
-        # shapes
+        self.maxx = col.maxx - col.minx
+        self.maxy = col.maxy - col.miny
+        self.grid_w = self.maxx + 1
+        self.grid_h = self.maxy + 1
+        # graphical objects
         self.grid = []
         self.ants = []
+        self.antn = col.antn
         self.links = []
-        self.rooms = {}
-        self.nbr_rooms = len(col.rooms)
-        # colors
-        self.background_color = "DodgerBlue3"
-        self.room_color = "blue"
-        self.start_room_color = "purple4"
-        self.end_room_color = "DarkGoldenrod1"
-        self.link_color = "black"
-        self.ant_color = "red"
-        # number of frames by ant movement (speed)
-        self.framec = 100
-        # wait time (ms)
-        self.delay = 300
-        self.waitc = 0
-        # current coordinates and x,y increments for each ant
-        self.steps = []
-        self.step = 0
-        # print grid option
-        self.print_grid = True
-        # copy of colony class for convenience
-        self.col = col
-        # play the game
-        self.play = False
+        self.rooms = self.init_vrooms(col)
+        self.roomn = col.size
         # update state
         self.update = U_NONE
         # asynchronous actions stack (FIFO)
         self.stack = []
+        # movements
+        self.framec = G_FRAMEC_DEF # number of frames by ant movement (speed)
+        self.steps = [] # last room coordinates and x,y increments for each ant
+        self.step = 0
+        self.waitc = 0
+        # game data
+        self.start = col.start
+        self.end = col.end
+        self.game = self.init_game(col)
+        self.game_len = len(self.game)
+        self.play = False
+        self.turn = 0
+
+    def init_vrooms(self, col):
+        vrooms = {}
+        for r in col.rooms:
+            vrooms[r] = vroom(col.rooms[r], col.minx, col.miny)
+        return vrooms
+
+    def init_game(self, col):
+        game = [[col.start] * self.antn for i in range(len(col.turns) + 1)]
+        for i in range(len(col.turns)):
+            for j in range(col.antn):
+                game[i + 1][j] = game[i][j]
+                for move in col.turns[i]:
+                    if move[0] == j + 1:
+                        game[i + 1][j] = move[1]
+                        break
+        return game
 
     def init_canvas(self):
         grid_w_max = (self.screen_width // G_SIDE_MIN) - 2
         grid_h_max = (self.screen_height // G_SIDE_MIN) - 2
-        if grid_w_max * grid_h_max < self.nbr_rooms:
+        if grid_w_max * grid_h_max < self.roomn:
             eprint("error: map too big for the screen")
             exit()
         elif grid_w_max < self.grid_w or grid_h_max < self.grid_h:
@@ -85,14 +108,14 @@ class vdata:
         self.grid_w = grid_w_max 
         self.grid_h = grid_h_max
         grid = [[0] * self.grid_h for i in range(self.grid_w)] 
-        for r in self.col.rooms:
-            x = int(self.col.rooms[r].x * scale_w)
-            y = int(self.col.rooms[r].y * scale_h)
+        for r in self.rooms:
+            x = int(self.rooms[r].x * scale_w)
+            y = int(self.rooms[r].y * scale_h)
             if grid[x][y] != 0:
                 x, y = self.move_room(x, y, grid, 1)
             grid[x][y] = 1
-            self.col.rooms[r].x = x
-            self.col.rooms[r].y = y
+            self.rooms[r].x = x
+            self.rooms[r].y = y
 
     def move_room(self, x, y, grid, dist):
         start_y = y - dist
@@ -142,7 +165,7 @@ class vdata:
             self.canvas_h = (self.grid_h + 2) * G_SIDE_MIN
             self.build_canvas_grid()
         self.can = Canvas(self.win, width=self.canvas_w, height=self.canvas_h,\
-        bg=self.background_color)
+        bg=BACKGROUND_COLOR)
         self.can.pack(side=TOP, fill=BOTH, expand=1)
         self.init_actions()
         self.can.update()
@@ -205,14 +228,14 @@ class vdata:
     def back_one_turn(self):
         if self.step > 0:
             self.step = 0
-        elif self.col.turn > 0:
-            self.col.turn -= 1
+        elif self.turn > 0:
+            self.turn -= 1
         self.play = False
         self.update = self.update_update(U_REFRESH)
 
     def forward_one_turn(self):
-        if self.col.turn < len(self.col.game) - 1:
-            self.col.turn += 1
+        if self.turn < self.game_len - 1:
+            self.turn += 1
             self.play = False
             self.step = 0
             self.update = self.update_update(U_REFRESH)
@@ -220,29 +243,29 @@ class vdata:
     def reset(self):
         self.play = False
         self.step = 0
-        self.col.turn = 0
+        self.turn = 0
         self.update = self.update_update(U_REFRESH)
 
     def go_to_end(self):
         self.play = False
         self.step = 0
-        self.col.turn = len(self.col.game) - 1
+        self.turn = self.game_len - 1
         self.update = self.update_update(U_REFRESH)
 
     def speed_up(self):
-        if self.framec > 10:
-            self.framec -= 10
-            if self.step > 0 and self.col.turn < len(self.col.game) - 1:
+        if self.framec > G_FRAMEC_MIN:
+            self.framec -= G_FRAMEC_STEP
+            if self.step > 0 and self.turn < self.game_len - 1:
                 self.update = self.update_update(U_MOVE)
 
     def speed_down(self):
-        if self.framec < 500:
-            self.framec += 10
+        if self.framec < G_FRAMEC_MAX:
+            self.framec += G_FRAMEC_STEP
             if self.step > 0:
                 self.update = self.update_update(U_MOVE)
 
     def debug(self):
-        print("self.col.turn:", self.col.turn, "/", len(self.col.game))
+        print("self.turn:", self.turn, "/", self.game_len)
         print("self.step:", self.step)
         print("self.play:", "True" if self.play == True else "False")
         print("self.update:",\
@@ -268,42 +291,42 @@ class vdata:
     
     def draw_map(self):
         self.delete_map()
-        if self.print_grid:
+        if G_PRINT_GRID:
             self.draw_grid()
-        for r in self.col.rooms:
+        for r in self.rooms:
             self.draw_links(r)
             self.draw_room(r)
         self.can.pack()
     
-    # draw ants at current postition (according to self.col.turn)
+    # draw ants at current postition (according to self.turn)
     def draw_ants(self):
         self.delete_ants()
-        for i in range(self.col.antn):
-            r = self.col.game[self.col.turn][i]
-            x1, y1, x2, y2 = self.ant_coords(self.col.rooms[r].x,\
-            self.col.rooms[r].y)
-            ant = self.can.create_oval(x1, y1, x2, y2, fill=self.ant_color)
+        for i in range(self.antn):
+            r = self.game[self.turn][i]
+            x1, y1, x2, y2 = self.ant_coords(self.rooms[r].x,\
+            self.rooms[r].y)
+            ant = self.can.create_oval(x1, y1, x2, y2, fill=ANT_COLOR)
             self.ants.append(ant)
         self.can.pack()
     
     def get_steps(self):
         self.steps.clear()
-        for i in range(self.col.antn):
+        for i in range(self.antn):
             # get the coordinates of the target room
             xy = self.ant_coords(\
-            self.col.rooms[self.col.game[self.col.turn + 1][i]].x,\
-            self.col.rooms[self.col.game[self.col.turn + 1][i]].y)
+            self.rooms[self.game[self.turn + 1][i]].x,\
+            self.rooms[self.game[self.turn + 1][i]].y)
             # get the coordinates of the current room
             cur = self.ant_coords(\
-            self.col.rooms[self.col.game[self.col.turn][i]].x,\
-            self.col.rooms[self.col.game[self.col.turn][i]].y)
+            self.rooms[self.game[self.turn][i]].x,\
+            self.rooms[self.game[self.turn][i]].y)
             # get increments
             ix = (xy[0] - cur[0]) / self.framec
             iy = (xy[1] - cur[1]) / self.framec
             self.steps.append([cur[0], cur[1], cur[2], cur[3], ix, iy])
 
     def draw_step(self):
-        for i in range(self.col.antn):
+        for i in range(self.antn):
             # move ant one frame toward the next node
             self.can.coords(self.ants[i],\
             self.steps[i][0] + (self.steps[i][4] * self.step),\
@@ -312,18 +335,18 @@ class vdata:
             self.steps[i][3] + (self.steps[i][5] * self.step))
 
     def fix(self):
-        for i in range(self.col.antn):
+        for i in range(self.antn):
             # fix ant precisely on the node
             xy = self.ant_coords(\
-            self.col.rooms[self.col.game[self.col.turn][i]].x,\
-            self.col.rooms[self.col.game[self.col.turn][i]].y)
+            self.rooms[self.game[self.turn][i]].x,\
+            self.rooms[self.game[self.turn][i]].y)
             self.can.coords(self.ants[i], xy[0], xy[1], xy[2], xy[3])
 
     def delete_map(self):
         self.delete_grid()
         for r in self.rooms:
-            self.can.delete(self.rooms[r])
-        self.rooms.clear()
+            self.can.delete(self.rooms[r].shape)
+            self.rooms[r].shape = None
         for link in self.links:
             self.can.delete(link)
         self.links.clear()
@@ -344,22 +367,22 @@ class vdata:
         self.can.pack()
     
     def draw_links(self, r):
-        for l in self.col.rooms[r].links:
-            if l not in self.rooms:
-                x1, y1, x2, y2 = self.link_coords(self.col.rooms[r].x,\
-                self.col.rooms[r].y, self.col.rooms[l].x, self.col.rooms[l].y)
+        for l in self.rooms[r].links:
+            if self.rooms[l].shape == None:
+                x1, y1, x2, y2 = self.link_coords(self.rooms[r].x,\
+                self.rooms[r].y, self.rooms[l].x, self.rooms[l].y)
                 link = self.can.create_line(x1, y1, x2, y2,\
-                fill=self.link_color, width=self.side/15)
+                fill=LINK_COLOR, width=self.side/15)
                 self.links.append(link)
     
     def draw_room(self, r):
-        x1, y1, x2, y2 = self.room_coords(self.col.rooms[r].x,\
-        self.col.rooms[r].y)
-        color = self.start_room_color if self.col.start == r\
-        else self.end_room_color if self.col.end == r else self.room_color
+        x1, y1, x2, y2 = self.room_coords(self.rooms[r].x,\
+        self.rooms[r].y)
+        color = START_ROOM_COLOR if self.start == r\
+        else END_ROOM_COLOR if self.end == r else ROOM_COLOR
         room = self.can.create_oval(x1, y1, x2, y2, fill=color, tags=r)
         CreateShapeToolTip(self.can, room, r)
-        self.rooms[r] = room
+        self.rooms[r].shape = room
     
     def delete_grid(self):
         for bar in self.grid:
@@ -394,7 +417,7 @@ class vdata:
     def play_game(self):
         self.async_actions()
         if self.play == True and self.update != U_WAIT:
-            if self.col.turn < len(self.col.game) - 1:
+            if self.turn < self.game_len - 1:
                 self.step += 1
                 if self.step == 1:
                     self.update = self.update_update(U_MOVE)
@@ -402,7 +425,7 @@ class vdata:
                     self.update = self.update_update(U_REFRESH)
                 else:
                     self.step = 0
-                    self.col.turn += 1
+                    self.turn += 1
                     self.update = self.update_update(U_REFRESH)
             else:
                 self.play = False
@@ -436,7 +459,7 @@ class vdata:
             else:
                 self.fix()
                 self.update = U_WAIT
-                self.waitc = self.delay
+                self.waitc = G_DELAY_DEF
             self.can.update()
         elif self.update == U_WAIT:
             if self.waitc > 0:
@@ -444,9 +467,22 @@ class vdata:
             else:
                 self.update = U_NONE
 
+class vroom:
+    def __init__(self, room, minx, miny):
+        # grid coordinates
+        self.orig_x = room.x
+        self.orig_y = room.y
+        self.x = room.x - minx # normalized x
+        self.y = room.y - miny # normalized y
+        # links to other rooms
+        self.links = room.links.copy()
+        # command attributes ("start", "end", etc...)
+        self.attrs = room.attrs.copy()
+        # graphical object
+        self.shape = None
+
 def run_visu(col):
     # init visual data
-    col.normalize_coords()
     vda = vdata(col)
     vda.init_canvas()
 

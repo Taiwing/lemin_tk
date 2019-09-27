@@ -14,8 +14,6 @@ class colony:
         self.start = ""
         self.end = ""
         self.turns = []
-        self.game = None
-        self.turn = 0
         self.minx = None
         self.maxx = None
         self.miny = None
@@ -98,31 +96,7 @@ class colony:
         ret += "\nturns:\n"
         for turn in self.turns:
             ret += str(turn) + "\n"
-        ret += "game:\n"
-        ret += str(self.game)
         return ret
-
-    def normalize_coords(self):
-        maxx = self.maxx - self.minx
-        maxy = self.maxy - self.miny
-        for r in self.rooms:
-            # make orignal coordinates 0,0    
-            self.rooms[r].x = self.rooms[r].x - self.minx
-            self.rooms[r].y = self.rooms[r].y - self.miny
-        self.maxx = maxx
-        self.maxy = maxy
-        self.minx = 0
-        self.miny = 0
-
-    def init_game(self):
-        self.game = [[self.start]* self.antn for i in range(len(self.turns) + 1)]
-        for i in range(len(self.turns)):
-            for j in range(self.antn):
-                self.game[i + 1][j] = self.game[i][j]
-                for move in self.turns[i]:
-                    if move[0] == j + 1:
-                        self.game[i + 1][j] = move[1]
-                        break
 
 class room:
     def __init__(self):
