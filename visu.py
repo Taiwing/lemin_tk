@@ -278,9 +278,6 @@ class vdata:
         if self.step > 0:
             self.get_steps()
             self.draw_step()
-        #not sure this else is needed (pretty sure it isnt) TODO: test
-        else:
-            self.fix()
     
     def draw_map(self):
         self.delete_map()
