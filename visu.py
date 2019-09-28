@@ -243,14 +243,18 @@ class vdata:
 
     def speed_up(self):
         if self.framec > G_FRAMEC_MIN:
+            orig_framec = self.framec
             self.framec -= G_FRAMEC_STEP
             if self.step > 0 and self.turn < self.game_len - 1:
+                self.step = (self.step / orig_framec) * self.framec
                 self.update = self.update_update(U_MOVE)
 
     def speed_down(self):
         if self.framec < G_FRAMEC_MAX:
+            orig_framec = self.framec
             self.framec += G_FRAMEC_STEP
             if self.step > 0:
+                self.step = (self.step / orig_framec) * self.framec
                 self.update = self.update_update(U_MOVE)
 
     def debug(self):
