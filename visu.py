@@ -29,7 +29,7 @@ LINK_COLOR = "black"
 ANT_COLOR = "red"
 
 class vdata:
-    def __init__(self, col):
+    def __init__(self, lmap, game):
         # window data
         self.win = Tk()
         self.screen_width = self.win.winfo_screenwidth()
@@ -44,17 +44,17 @@ class vdata:
         self.orig_x = 0
         self.orig_y = 0
         # grid data
-        self.maxx = col.maxx - col.minx
-        self.maxy = col.maxy - col.miny
+        self.maxx = lmap.maxx - lmap.minx
+        self.maxy = lmap.maxy - lmap.miny
         self.grid_w = self.maxx + 1
         self.grid_h = self.maxy + 1
         # graphical objects
         self.grid = []
         self.ants = []
-        self.antn = col.antn
+        self.antn = lmap.antn
         self.links = []
-        self.rooms = self.init_vrooms(col)
-        self.roomn = col.size
+        self.rooms = self.init_vrooms(lmap)
+        self.roomn = lmap.size
         # update state
         self.update = U_NONE
         # asynchronous actions stack (FIFO)
@@ -65,30 +65,19 @@ class vdata:
         self.step = 0
         self.waitc = 0
         # game data
-        self.start = col.start
-        self.end = col.end
-        self.game = self.init_game(col)
+        self.start = lmap.start
+        self.end = lmap.end
+        self.game = game
         self.game_len = len(self.game)
         self.play = False
         self.turn = 0
 
-    def init_vrooms(self, col):
+    def init_vrooms(self, lmap):
         vrooms = {}
-        for r in col.rooms:
-            vrooms[r] = vroom(col.rooms[r], col.minx, col.miny)
+        for r in lmap.rooms:
+            vrooms[r] = vroom(lmap.rooms[r], lmap.minx, lmap.miny)
         return vrooms
-
-    def init_game(self, col):
-        game = [[col.start] * self.antn for i in range(len(col.turns) + 1)]
-        for i in range(len(col.turns)):
-            for j in range(col.antn):
-                game[i + 1][j] = game[i][j]
-                for move in col.turns[i]:
-                    if move[0] == j + 1:
-                        game[i + 1][j] = move[1]
-                        break
-        return game
-
+    
     def init_canvas(self):
         grid_w_max = (self.screen_width // G_SIDE_MIN) - 2
         grid_h_max = (self.screen_height // G_SIDE_MIN) - 2
@@ -481,9 +470,9 @@ class vroom:
         # graphical object
         self.shape = None
 
-def run_visu(col):
+def run_visu(lmap, game):
     # init visual data
-    vda = vdata(col)
+    vda = vdata(lmap, game)
     vda.init_canvas()
 
     # main loop

@@ -2,18 +2,17 @@
 
 from utils import *
 
-def col_eprint(err):
+def map_eprint(err):
     eprint("error: " + err)
 
-class colony:
+class lemin_map:
     def __init__(self):
         self.antn = 0
-        self.size = 0 #number of rooms
+        self.size = 0 # number of rooms
         self.rooms = {}
         self.links = []
         self.start = ""
         self.end = ""
-        self.turns = []
         self.minx = None
         self.maxx = None
         self.miny = None
@@ -22,15 +21,16 @@ class colony:
     def set_antn(self, antn, commands):
         commands.clear() #until antn commands are added if any
         if antn <= 0:
-            col_eprint(str(ant) + " is an invalid number of ants")
+            map_eprint(str(ant) + " is an invalid number of ants")
             exit()
         self.antn = antn
 
     def add_room(self, r, commands):
         if r[0] in self.rooms:
-            col_eprint("room \"" + r[0]  + "\" already defined.")
+            map_eprint("room \"" + r[0]  + "\" already defined.")
         else:
             self.rooms[r[0]] = room()
+            self.size += 1
         self.rooms[r[0]].x = r[1]
         if self.minx == None or r[1] < self.minx:
             self.minx = r[1]
@@ -51,33 +51,24 @@ class colony:
                 self.end = r[0]
                 self.start = "" if self.start == self.end else self.start
                 self.rooms[r[0]].attrs.append(com)
+            elif com == "":
+                map_eprint("empty command")
             else:
-                col_eprint("\"" + com + "\" unknown command")
+                map_eprint("\"" + com + "\" unknown command")
 
     def add_link(self, link, commands):
         commands.clear() #until link commands are a reality
         if link[0] not in self.rooms or link[1] not in self.rooms:
-            col_eprint("\"" + link[0] + "-" + link[1] + "\" is invalid") 
+            map_eprint("\"" + link[0] + "-" + link[1] + "\" is invalid") 
             exit()
         elif link in self.links or link[::-1] in self.links:
-            col_eprint("\"" + link[0] + "-" + link[1] + "\" already exists") 
+            map_eprint("\"" + link[0] + "-" + link[1] + "\" already exists") 
         else:
             self.links.append(link)
             self.rooms[link[0]].links.append(link[1])
             self.rooms[link[1]].links.append(link[0])
 
-    def add_turn(self, turn, commands):
-        commands.clear() #until turn commands are added
-        for move in turn:
-            if move[0] <= 0 or move[0] > self.antn:
-                col_eprint("invalid ant ID")
-                exit()
-            elif move[1] not in self.rooms:
-                col_eprint("non-existing room")
-                exit()
-        self.turns.append(turn)
-
-    def cprint(self):
+    def mprint(self):
         ret = "antn = " + str(self.antn) + "\n"\
         + "size = " + str(self.size) + "\n"\
         + "start: " + self.start + "\n"\
@@ -93,9 +84,6 @@ class colony:
         ret += "\nlinks:\n"
         for link in self.links:
             ret += str(link) + "\n"
-        ret += "\nturns:\n"
-        for turn in self.turns:
-            ret += str(turn) + "\n"
         return ret
 
 class room:
@@ -107,6 +95,8 @@ class room:
         self.links = []
         # command attributes ("start", "end", etc...)
         self.attrs = []
+        # for BFS verification of the map
+        self.discovered = False 
 
     def rprint(self):
         ret = "x = " + str(self.x) + "; y = " + str(self.y) + "\n"
