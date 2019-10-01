@@ -47,10 +47,16 @@ class vdata:
         # grid data
         self.maxx = lmap.maxx - lmap.minx
         self.maxy = lmap.maxy - lmap.miny
-        self.grid_w = self.maxx + 1
-        self.grid_h = self.maxy + 1
+        self.orig_w = self.maxx + 1
+        self.orig_h = self.maxy + 1
+        self.grid_w = self.orig_w
+        self.grid_h = self.orig_h
+        # biggest printable grid
         self.grid_w_max = (self.screen_width // G_SIDE_MIN) - 2
         self.grid_h_max = (self.screen_height // G_SIDE_MIN) - 2
+        # smallest grid big enough to fit all rooms
+        self.grid_w_min = 0
+        self.grid_h_min = 0
         # graphical objects
         self.grid = []
         self.ants = []
@@ -80,17 +86,24 @@ class vdata:
         for r in lmap.rooms:
             vrooms[r] = vroom(lmap.rooms[r], lmap.minx, lmap.miny)
         return vrooms
-    
+ 
     def init_canvas(self):
+        self.get_min_grid()
         if self.grid_w_max * self.grid_h_max < self.roomn:
             eprint("error: map too big for the screen")
             exit()
         elif self.grid_w_max < self.grid_w or self.grid_h_max < self.grid_h:
-            compress_coordinates(self)
+            compress_coordinates(self, compression="min")
         self.build_default_grid()
         win_w_min = (self.grid_w + 2) * G_SIDE_MIN
         win_h_min = (self.grid_h + 2) * G_SIDE_MIN
         self.win.minsize(win_w_min, win_h_min)
+
+    def get_min_grid(self):
+        scale = self.screen_width / self.screen_height
+        while self.grid_w_min * self.grid_h_min < self.roomn:
+            self.grid_w_min += 1
+            self.grid_h_min = int(self.grid_w_min / scale)
 
     def build_default_grid(self):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 

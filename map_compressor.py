@@ -2,11 +2,12 @@
 
 from utils import *
 
-def compress_coordinates(vda):
-    scale_w = vda.grid_w_max / vda.grid_w
-    scale_h = vda.grid_h_max / vda.grid_h
-    vda.grid_w = vda.grid_w_max 
-    vda.grid_h = vda.grid_h_max
+def compress_coordinates(vda, compression="min", w_comp=0, h_comp=0):
+    grid_w, grid_h = get_new_grid(vda, compression, w_comp, h_comp)
+    scale_w = grid_w / vda.grid_w
+    scale_h = grid_h / vda.grid_h
+    vda.grid_w = grid_w
+    vda.grid_h = grid_h
     grid = [[0] * vda.grid_h for i in range(vda.grid_w)] 
     for r in vda.rooms:
         x = int(vda.rooms[r].x * scale_w)
@@ -16,6 +17,20 @@ def compress_coordinates(vda):
         grid[x][y] = 1
         vda.rooms[r].x = x
         vda.rooms[r].y = y
+
+def get_new_grid(vda, compression, w_comp, h_comp):
+    grid_w = vda.grid_w_max
+    grid_h = vda.grid_h_max
+    if compression == "max":
+        grid_w = vda.grid_w_min
+        grid_h = vda.grid_h_min
+    # untested custom w_comp - h_comp
+    elif compression != "min":
+        scale_w = (vda.orig_w / vda.grid_w_min) * (w_comp / 100)
+        scale_h = (vda.orig_h / vda.grid_h_min) * (h_comp / 100)
+        grid_w = int(vda.orig_w / scale_w)
+        grid_h = int(vda.orig_h / scale_h)
+    return grid_w, grid_h
 
 def move_room(vda, x, y, grid, dist):
     start_y = y - dist
@@ -54,4 +69,4 @@ def move_room(vda, x, y, grid, dist):
             if grid[tx][ty] == 0:
                 return tx, ty
             ty -= 1
-    return move_room(x, y, grid, dist + 1)
+    return move_room(vda, x, y, grid, dist + 1)
