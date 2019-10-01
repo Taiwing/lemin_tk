@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+from utils import *
+
+def compress_coordinates(vda):
+    scale_w = vda.grid_w_max / vda.grid_w
+    scale_h = vda.grid_h_max / vda.grid_h
+    vda.grid_w = vda.grid_w_max 
+    vda.grid_h = vda.grid_h_max
+    grid = [[0] * vda.grid_h for i in range(vda.grid_w)] 
+    for r in vda.rooms:
+        x = int(vda.rooms[r].x * scale_w)
+        y = int(vda.rooms[r].y * scale_h)
+        if grid[x][y] != 0:
+            x, y = move_room(vda, x, y, grid, 1)
+        grid[x][y] = 1
+        vda.rooms[r].x = x
+        vda.rooms[r].y = y
+
+def move_room(vda, x, y, grid, dist):
+    start_y = y - dist
+    start_x = x - dist
+    end_y = y + dist
+    end_x = x + dist
+    if start_y < 0 and start_x < 0\
+    and end_y > vda.grid_h - 1 and end_x > vda.grid_w - 1:
+        eprint("error: no place found in grid")
+        exit()
+    ty = start_y 
+    tx = max(0, start_x)
+    if ty >= 0:
+        while tx < end_x + 1 and tx < vda.grid_w:
+            if grid[tx][ty] == 0:
+                return tx, ty
+            tx += 1
+    ty = max(0, start_y)
+    tx = end_x
+    if tx < vda.grid_w:
+        while ty < end_y + 1 and ty < vda.grid_h:
+            if grid[tx][ty] == 0:
+                return tx, ty
+            ty += 1
+    ty = end_y
+    tx = min(vda.grid_w - 1, end_x)
+    if ty < vda.grid_h:
+        while tx >= start_x and tx >= 0:
+            if grid[tx][ty] == 0:
+                return tx, ty
+            tx -= 1
+    ty = min(vda.grid_h - 1, end_y)
+    tx = start_x
+    if tx >= 0:
+        while ty >= start_y and ty >= 0:
+            if grid[tx][ty] == 0:
+                return tx, ty
+            ty -= 1
+    return move_room(x, y, grid, dist + 1)
