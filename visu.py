@@ -284,6 +284,7 @@ class vdata:
             self.draw_grid()
         for r in self.rooms:
             self.draw_links(r)
+        for r in self.rooms:
             self.draw_room(r)
         self.can.pack()
     

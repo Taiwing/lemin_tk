@@ -7,9 +7,8 @@
 	in the map editor)
 - when the map is still too big, try to only print used rooms,
   and eventually also compress the map
-- maybe stack the room collisions in compress coordinates to give priority
-  to original coordinates
-- draw all the links before the rooms (so that no link is above a room)
+- maybe queue the room collisions in compress coordinates to give priority
+  to original coordinates (in the map compressor)
 - add a settings menu and a settings file to tweak lemin_tk's behavior
 - the map editor
 - a map generator
