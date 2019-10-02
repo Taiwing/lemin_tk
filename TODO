@@ -8,4 +8,4 @@
 - a map generator
 - make it possible to run lemin_tk without providing it a map and to select
   the map and solver from a menu
-- a checker to see if the solution is valid
+- optimize printing
