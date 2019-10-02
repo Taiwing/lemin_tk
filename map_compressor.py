@@ -9,14 +9,14 @@ def compress_coordinates(vda, compression="min", w_comp=0, h_comp=0):
     vda.grid_w = grid_w
     vda.grid_h = grid_h
     grid = [[0] * vda.grid_h for i in range(vda.grid_w)] 
-    for r in vda.rooms:
-        x = int(vda.rooms[r].orig_x * scale_w)
-        y = int(vda.rooms[r].orig_y * scale_h)
+    for r in vda.lmap.rooms:
+        x = int(vda.lmap.rooms[r].orig_x * scale_w)
+        y = int(vda.lmap.rooms[r].orig_y * scale_h)
         if grid[x][y] != 0:
             x, y = move_room(vda, x, y, grid, 1)
         grid[x][y] = 1
-        vda.rooms[r].x = x
-        vda.rooms[r].y = y
+        vda.lmap.rooms[r].x = x
+        vda.lmap.rooms[r].y = y
 
 def get_new_grid(vda, compression, w_comp, h_comp):
     grid_w = vda.grid_w_max

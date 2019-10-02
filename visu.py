@@ -16,6 +16,7 @@ U_REDRAW = 4
 
 # graphical constants # TODO: config structure
 G_PRINT_GRID = True
+G_PRINT_UNUSED_DEF = True
 G_SIDE_MIN = 10
 G_SIDE_DEF = 50 # not used yet
 G_SCREEN_DIV = 2 # use half the screen by default
@@ -47,7 +48,7 @@ class vdata:
         self.orig_x = 0
         self.orig_y = 0
         # grid data
-        self.orig_w = lmap.orig_w
+        self.orig_w = lmap.orig_w # TODO: delete this once the grid data struct is created
         self.orig_h = lmap.orig_h
         self.grid_w = self.orig_w
         self.grid_h = self.orig_h
@@ -69,13 +70,10 @@ class vdata:
         # graphical objects
         self.grid = []
         self.ants = []
-        self.antn = lmap.antn
-        self.links = lmap.links
-        self.rooms = lmap.rooms
         self.unused_rooms = {}
-        self.print_unused = True
-        self.roomn = len(self.rooms)
-        tag_used_rooms(game, self.rooms)
+        self.print_unused = G_PRINT_UNUSED_DEF
+        self.roomn = len(lmap.rooms)
+        tag_used_rooms(game, lmap.rooms)
         # update state
         self.update = U_NONE
         # asynchronous actions stack (FIFO)
@@ -86,8 +84,7 @@ class vdata:
         self.step = 0
         self.waitc = 0
         # game data
-        self.start = lmap.start
-        self.end = lmap.end
+        self.lmap = lmap
         self.game = game
         self.game_len = len(self.game)
         self.play = False
@@ -293,41 +290,41 @@ class vdata:
         self.delete_map()
         if G_PRINT_GRID:
             self.draw_grid()
-        for r in self.rooms:
+        for r in self.lmap.rooms:
             self.draw_links(r)
-        for r in self.rooms:
+        for r in self.lmap.rooms:
             self.draw_room(r)
         self.can.pack()
     
     # draw ants at current postition (according to self.turn)
     def draw_ants(self):
         self.delete_ants()
-        for i in range(self.antn):
+        for i in range(self.lmap.antn):
             r = self.game[self.turn][i]
-            x1, y1, x2, y2 = self.ant_coords(self.rooms[r].x,\
-            self.rooms[r].y)
+            x1, y1, x2, y2 = self.ant_coords(self.lmap.rooms[r].x,\
+            self.lmap.rooms[r].y)
             ant = self.can.create_oval(x1, y1, x2, y2, fill=ANT_COLOR)
             self.ants.append(ant)
         self.can.pack()
     
     def get_steps(self):
         self.steps.clear()
-        for i in range(self.antn):
+        for i in range(self.lmap.antn):
             # get the coordinates of the target room
             xy = self.ant_coords(\
-            self.rooms[self.game[self.turn + 1][i]].x,\
-            self.rooms[self.game[self.turn + 1][i]].y)
+            self.lmap.rooms[self.game[self.turn + 1][i]].x,\
+            self.lmap.rooms[self.game[self.turn + 1][i]].y)
             # get the coordinates of the current room
             cur = self.ant_coords(\
-            self.rooms[self.game[self.turn][i]].x,\
-            self.rooms[self.game[self.turn][i]].y)
+            self.lmap.rooms[self.game[self.turn][i]].x,\
+            self.lmap.rooms[self.game[self.turn][i]].y)
             # get increments
             ix = (xy[0] - cur[0]) / self.framec
             iy = (xy[1] - cur[1]) / self.framec
             self.steps.append([cur[0], cur[1], cur[2], cur[3], ix, iy])
 
     def draw_step(self):
-        for i in range(self.antn):
+        for i in range(self.lmap.antn):
             # move ant one frame toward the next node
             self.can.coords(self.ants[i],\
             self.steps[i][0] + (self.steps[i][4] * self.step),\
@@ -336,25 +333,25 @@ class vdata:
             self.steps[i][3] + (self.steps[i][5] * self.step))
 
     def fix(self):
-        for i in range(self.antn):
+        for i in range(self.lmap.antn):
             # fix ant precisely on the node
             xy = self.ant_coords(\
-            self.rooms[self.game[self.turn][i]].x,\
-            self.rooms[self.game[self.turn][i]].y)
+            self.lmap.rooms[self.game[self.turn][i]].x,\
+            self.lmap.rooms[self.game[self.turn][i]].y)
             self.can.coords(self.ants[i], xy[0], xy[1], xy[2], xy[3])
 
     def delete_map(self):
         self.delete_grid()
-        for r in self.rooms:
-            self.can.delete(self.rooms[r].shape)
-            self.rooms[r].shape = None
+        for r in self.lmap.rooms:
+            self.can.delete(self.lmap.rooms[r].shape)
+            self.lmap.rooms[r].shape = None
         for r in self.unused_rooms:
             self.can.delete(self.unused_rooms[r].shape)
             self.unused_rooms[r].shape = None
-        for l in self.links:
-            if self.links[l].shape != None:
-                self.can.delete(self.links[l].shape)
-            self.links[l].shape = None
+        for l in self.lmap.links:
+            if self.lmap.links[l].shape != None:
+                self.can.delete(self.lmap.links[l].shape)
+            self.lmap.links[l].shape = None
     
     def draw_grid(self):
         self.delete_grid()
@@ -372,23 +369,23 @@ class vdata:
         self.can.pack()
     
     def draw_links(self, r):
-        for l in self.rooms[r].links:
+        for l in self.lmap.rooms[r].links:
             name = link_name(r, l)
-            if l not in self.unused_rooms and self.links[name].shape == None:
-                x1, y1, x2, y2 = self.link_coords(self.rooms[r].x,\
-                self.rooms[r].y, self.rooms[l].x, self.rooms[l].y)
+            if l not in self.unused_rooms and self.lmap.links[name].shape == None:
+                x1, y1, x2, y2 = self.link_coords(self.lmap.rooms[r].x,\
+                self.lmap.rooms[r].y, self.lmap.rooms[l].x, self.lmap.rooms[l].y)
                 link = self.can.create_line(x1, y1, x2, y2,\
                 fill=LINK_COLOR, width=self.side/15)
-                self.links[name].shape = link
+                self.lmap.links[name].shape = link
     
     def draw_room(self, r):
-        x1, y1, x2, y2 = self.room_coords(self.rooms[r].x,\
-        self.rooms[r].y)
-        color = START_ROOM_COLOR if self.start == r\
-        else END_ROOM_COLOR if self.end == r else ROOM_COLOR
+        x1, y1, x2, y2 = self.room_coords(self.lmap.rooms[r].x,\
+        self.lmap.rooms[r].y)
+        color = START_ROOM_COLOR if self.lmap.start == r\
+        else END_ROOM_COLOR if self.lmap.end == r else ROOM_COLOR
         room = self.can.create_oval(x1, y1, x2, y2, fill=color, tags=r)
         CreateShapeToolTip(self.can, room, r)
-        self.rooms[r].shape = room
+        self.lmap.rooms[r].shape = room
     
     def delete_grid(self):
         for bar in self.grid:
