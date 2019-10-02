@@ -51,9 +51,18 @@ class vdata:
         self.orig_h = self.maxy + 1
         self.grid_w = self.orig_w
         self.grid_h = self.orig_h
+        self.w_comp = 0
+        self.h_comp = 0
+        self.w_comp_min = 0
+        self.h_comp_min = 0
         # biggest printable grid
-        self.grid_w_max = (self.screen_width // G_SIDE_MIN) - 2
-        self.grid_h_max = (self.screen_height // G_SIDE_MIN) - 2
+        self.big_grid_w = (self.screen_width // G_SIDE_MIN) - 2
+        self.big_grid_h = (self.screen_height // G_SIDE_MIN) - 2
+        # biggest grid for current map
+        self.grid_w_max = self.big_grid_w if self.orig_w > self.big_grid_w\
+        else self.orig_w
+        self.grid_h_max = self.big_grid_h if self.orig_h > self.big_grid_h\
+        else self.orig_h
         # smallest grid big enough to fit all rooms
         self.grid_w_min = 0
         self.grid_h_min = 0
@@ -89,12 +98,14 @@ class vdata:
  
     def init_canvas(self):
         self.get_min_grid()
-        if self.grid_w_max * self.grid_h_max < self.roomn:
+        if self.big_grid_w * self.big_grid_h < self.roomn:
             eprint("error: map too big for the screen")
             exit()
-        elif self.grid_w_max < self.grid_w or self.grid_h_max < self.grid_h:
+        elif self.big_grid_w < self.grid_w or self.big_grid_h < self.grid_h:
             compress_coordinates(self, compression="min")
         self.build_default_grid()
+        self.w_comp_min = self.w_comp
+        self.h_comp_min = self.h_comp
         win_w_min = (self.grid_w + 2) * G_SIDE_MIN
         win_h_min = (self.grid_h + 2) * G_SIDE_MIN
         self.win.minsize(win_w_min, win_h_min)
@@ -136,6 +147,8 @@ class vdata:
         self.win.bind("r", self.r_handler)
         self.win.bind("e", self.e_handler)
         self.win.bind("d", self.d_handler)
+        self.win.bind("+", self.plus_handler)
+        self.win.bind("-", self.minus_handler)
         
     def configure_handler(self, event):
         self.stack.insert(0, self.scale_canvas)
@@ -165,6 +178,12 @@ class vdata:
 
     def d_handler(self, event):
         self.debug()
+    
+    def plus_handler(self, event):
+        self.stack.insert(0, self.compress_map)
+
+    def minus_handler(self, event):
+        self.stack.insert(0, self.uncompress_map)
 
     def scale_canvas(self):
         self.update = U_REDRAW
@@ -230,6 +249,26 @@ class vdata:
         "ERROR")
         print("len(self.stack)", len(self.stack))
         print("self.stack:", self.stack)
+        print("self.w_comp =", self.w_comp)
+        print("self.h_comp =", self.h_comp)
+
+    def compress_map(self):
+        self.w_comp = 5 if self.w_comp < 5 else\
+        self.w_comp + 5 if self.w_comp + 5 < 100 else 100
+        self.h_comp = 5 if self.h_comp < 5 else\
+        self.h_comp + 5 if self.h_comp + 5 < 100 else 100
+        compress_coordinates(self, compression="cust",\
+        w_comp=self.w_comp, h_comp=self.h_comp)
+        self.update = U_REDRAW
+
+    def uncompress_map(self):
+        self.w_comp = self.w_comp_min if self.w_comp - 5 < self.w_comp_min\
+                else self.w_comp - 5
+        self.h_comp = self.h_comp_min if self.h_comp - 5 < self.h_comp_min\
+                else self.h_comp - 5
+        compress_coordinates(self, compression="cust",\
+        w_comp=self.w_comp, h_comp=self.h_comp)
+        self.update = U_REDRAW
 
     def redraw(self):
         self.build_canvas_grid()
@@ -420,10 +459,10 @@ class vdata:
 class vroom:
     def __init__(self, room, minx, miny):
         # grid coordinates
-        self.orig_x = room.x
-        self.orig_y = room.y
-        self.x = room.x - minx # normalized x
-        self.y = room.y - miny # normalized y
+        self.orig_x = room.x - minx
+        self.orig_y = room.y - miny
+        self.x = self.orig_x
+        self.y = self.orig_y
         # links to other rooms
         self.links = room.links.copy()
         # command attributes ("start", "end", etc...)
