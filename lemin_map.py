@@ -13,10 +13,8 @@ class lemin_map:
         self.links = []
         self.start = ""
         self.end = ""
-        self.minx = None
-        self.maxx = None
-        self.miny = None
-        self.maxy = None
+        self.orig_w = 0
+        self.orig_h = 0
 
     def set_antn(self, antn, commands):
         commands.clear() #until antn commands are added if any
@@ -25,22 +23,22 @@ class lemin_map:
             exit()
         self.antn = antn
 
-    def add_room(self, r, commands):
+    def add_room(self, r, commands, p):
         if r[0] in self.rooms:
             map_eprint("room \"" + r[0]  + "\" already defined.")
         else:
             self.rooms[r[0]] = room()
             self.size += 1
-        self.rooms[r[0]].x = r[1]
-        if self.minx == None or r[1] < self.minx:
-            self.minx = r[1]
-        if self.maxx == None or r[1] > self.maxx:
-            self.maxx = r[1]
-        self.rooms[r[0]].y = r[2]
-        if self.miny == None or r[2] < self.miny:
-            self.miny = r[2]
-        if self.maxy == None or r[2] > self.maxy:
-            self.maxy = r[2]
+        self.rooms[r[0]].orig_x = r[1]
+        if p.minx == None or r[1] < p.minx:
+            p.minx = r[1]
+        if p.maxx == None or r[1] > p.maxx:
+            p.maxx = r[1]
+        self.rooms[r[0]].orig_y = r[2]
+        if p.miny == None or r[2] < p.miny:
+            p.miny = r[2]
+        if p.maxy == None or r[2] > p.maxy:
+            p.maxy = r[2]
         for com in commands:
             # right now, this is ugly, do a function pointer dictionnary
             if com == "start":
@@ -73,10 +71,6 @@ class lemin_map:
         + "size = " + str(self.size) + "\n"\
         + "start: " + self.start + "\n"\
         + "end: " + self.end + "\n"\
-        + "minx = " + str(self.minx) + "\n"\
-        + "maxx = " + str(self.maxx) + "\n"\
-        + "miny = " + str(self.miny) + "\n"\
-        + "maxy = " + str(self.maxy) + "\n"\
         + "\nrooms:\n"
         for room in self.rooms:
             ret += "\"" + room + "\":\n"
@@ -88,17 +82,23 @@ class lemin_map:
 
 class room:
     def __init__(self):
-        # grid coordinates
-        self.x = -1
-        self.y = -1
         # links to other rooms
         self.links = []
         # command attributes ("start", "end", etc...)
         self.attrs = []
         # for BFS verification of the map
         self.discovered = False 
+        # grid coordinates
+        self.orig_x = -1 # original normalized coordinates
+        self.orig_y = -1 # original normalized coordinates
+        self.x = -1 # current coordinates
+        self.y = -1 # current coordinates
+        # graphical object
+        self.shape = None
 
     def rprint(self):
+        ret = "orig_x = " + str(self.orig_x) +\
+        "; orig_y = " + str(self.orig_y) + "\n"
         ret = "x = " + str(self.x) + "; y = " + str(self.y) + "\n"
         ret += "links: " + str(self.links) + "\n"
         ret += "attributes: " + str(self.attrs) + "\n"

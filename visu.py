@@ -46,10 +46,8 @@ class vdata:
         self.orig_x = 0
         self.orig_y = 0
         # grid data
-        self.maxx = lmap.maxx - lmap.minx
-        self.maxy = lmap.maxy - lmap.miny
-        self.orig_w = self.maxx + 1
-        self.orig_h = self.maxy + 1
+        self.orig_w = lmap.orig_w
+        self.orig_h = lmap.orig_h
         self.grid_w = self.orig_w
         self.grid_h = self.orig_h
         self.w_comp = 0
@@ -72,7 +70,7 @@ class vdata:
         self.ants = []
         self.antn = lmap.antn
         self.links = []
-        self.rooms = self.init_vrooms(lmap)
+        self.rooms = lmap.rooms
         self.unused_rooms = {}
         self.print_unused = True
         self.roomn = len(self.rooms)
@@ -272,9 +270,9 @@ class vdata:
 
     def uncompress_map(self):
         self.w_comp = self.w_comp_min if self.w_comp - 5 < self.w_comp_min\
-                else self.w_comp - 5
+        else self.w_comp - 5
         self.h_comp = self.h_comp_min if self.h_comp - 5 < self.h_comp_min\
-                else self.h_comp - 5
+        else self.h_comp - 5
         compress_coordinates(self, compression="cust",\
         w_comp=self.w_comp, h_comp=self.h_comp)
         self.update = U_REDRAW
@@ -477,20 +475,6 @@ class vdata:
                 self.waitc -= 1
             else:
                 self.update = U_NONE
-
-class vroom:
-    def __init__(self, room, minx, miny):
-        # grid coordinates
-        self.orig_x = room.x - minx
-        self.orig_y = room.y - miny
-        self.x = self.orig_x
-        self.y = self.orig_y
-        # links to other rooms
-        self.links = room.links.copy()
-        # command attributes ("start", "end", etc...)
-        self.attrs = room.attrs.copy()
-        # graphical object
-        self.shape = None
 
 def run_visu(lmap, game):
     # init visual data

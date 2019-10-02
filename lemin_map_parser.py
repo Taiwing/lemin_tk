@@ -33,7 +33,15 @@ def get_links(s, l):
     parser_eprint("\"" + s + "\" is not a valid link.", l)
     return None, None
 
+def normalize_coordinates(rooms, p):
+    for r in rooms:
+        rooms[r].orig_x = rooms[r].orig_x - p.minx
+        rooms[r].orig_y = rooms[r].orig_y - p.miny
+        rooms[r].x = rooms[r].orig_x
+        rooms[r].y = rooms[r].orig_y
+
 def lemin_map_parser(source=sys.stdin):
+    p = pdata()
     lc = 1
     commands = []
     lmap = lemin_map()
@@ -51,11 +59,23 @@ def lemin_map_parser(source=sys.stdin):
                 lmap.set_antn(out, commands)
                 readf = get_rooms
             elif readf == get_rooms:
-                lmap.add_room(out, commands)
+                lmap.add_room(out, commands, p)
             elif readf == get_links:
                 lmap.add_link(out, commands)
             elif readf == None:
                 return None, None
             commands.clear()
         lc += 1
+    normalize_coordinates(lmap.rooms, p)
+    if p.maxx != None and p.minx != None:
+        lmap.orig_w = p.maxx - p.minx + 1
+    if p.maxy != None and p.miny != None:
+        lmap.orig_h = p.maxy - p.miny + 1
     return lmap, lc
+
+class pdata:
+    def __init__(self):
+        self.minx = None
+        self.maxx = None
+        self.miny = None
+        self.maxy = None
