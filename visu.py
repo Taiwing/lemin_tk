@@ -74,7 +74,8 @@ class vdata:
         self.turn = 0
 
     def init_canvas(self):
-        self.get_min_grid()
+        self.grid.get_min(self.screen_width,\
+        self.screen_height, self.roomn)
         if self.grid.big_width * self.grid.big_height < self.roomn:
             # TODO: add a call to remove_unused here and check if it works
             # TODO: also replace the next elif by a if so that it always
@@ -90,12 +91,6 @@ class vdata:
         win_w_min = (self.grid.width + 2) * G_SIDE_MIN
         win_h_min = (self.grid.height + 2) * G_SIDE_MIN
         self.win.minsize(win_w_min, win_h_min)
-
-    def get_min_grid(self):
-        scale = self.screen_width / self.screen_height
-        while self.grid.width_min * self.grid.height_min < self.roomn:
-            self.grid.width_min += 1
-            self.grid.height_min = int(self.grid.width_min / scale)
 
     def build_canvas(self):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 

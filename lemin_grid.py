@@ -26,3 +26,10 @@ class lemin_grid:
         self.h_comp_min = 0
         # graphical objects
         self.shapes = []
+
+    def get_min(self, screen_w, screen_h, roomn):
+        scale = screen_w / screen_h
+        while self.width_min * self.height_min < roomn:
+            self.width_min += 1
+            self.height_min = int(self.width_min / scale)
+        
