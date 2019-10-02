@@ -52,7 +52,7 @@ class lemin_screen:
         # TODO: remove G_SIDE_MIN from grid parameters when config struct is on
         self.grid = lemin_grid(lmap, self.screen_width, self.screen_height, G_SIDE_MIN)
         # graphical objects
-        self.ants = []
+        self.lmap = lmap
         self.print_unused = G_PRINT_UNUSED_DEF
         self.roomn = len(lmap.rooms) # only printed rooms (all by default)
         tag_used_rooms(game, lmap.rooms)
@@ -60,19 +60,8 @@ class lemin_screen:
         self.update = U_NONE
         # asynchronous actions stack (FIFO)
         self.stack = []
-        # movements
-        self.framec = G_FRAMEC_DEF # number of frames by ant movement (speed)
-        self.steps = [] # last room coordinates and x,y increments for each ant
-        self.step = 0
-        self.waitc = 0
-        # game data
-        self.lmap = lmap
-        self.game = game
-        self.game_len = len(self.game)
-        self.play = False
-        self.turn = 0
 
-    def init_canvas(self):
+    def init_canvas(self, init_mode_actions):
         self.grid.get_min(self.screen_width,\
         self.screen_height, self.roomn)
         if self.grid.big_width * self.grid.big_height < self.roomn:
@@ -84,14 +73,14 @@ class lemin_screen:
                 exit()
         elif self.grid.big_width < self.grid.width or self.grid.big_height < self.grid.height:
             compress_coordinates(self, compression="min")
-        self.build_canvas()
+        self.build_canvas(init_mode_actions)
         self.grid.w_comp_min = self.grid.w_comp
         self.grid.h_comp_min = self.grid.h_comp
         win_w_min = (self.grid.width + 2) * G_SIDE_MIN
         win_h_min = (self.grid.height + 2) * G_SIDE_MIN
         self.win.minsize(win_w_min, win_h_min)
 
-    def build_canvas(self):
+    def build_canvas(self, init_mode_actions):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 
         self.canvas_h = self.screen_height / G_SCREEN_DIV 
         if self.get_side_size():
@@ -103,6 +92,7 @@ class lemin_screen:
         bg=BACKGROUND_COLOR)
         self.can.pack(side=TOP, fill=BOTH, expand=1)
         self.init_actions()
+        init_mode_actions()
         self.can.update()
 
     def get_side_size(self):
@@ -112,16 +102,9 @@ class lemin_screen:
         self.orig_y = (self.canvas_h - (self.grid.height * self.side)) / 2
         return 1 if self.side < G_SIDE_MIN else 0
 
+    # TODO: move this to lemin_player.py
     def init_actions(self):
         self.can.bind("<Configure>", self.configure_handler)
-        self.win.bind("<space>", self.space_handler)
-        self.win.bind("<Left>", self.left_handler)
-        self.win.bind("<Right>", self.right_handler)
-        self.win.bind("<Up>", self.up_handler)
-        self.win.bind("<Down>", self.down_handler)
-        self.win.bind("r", self.r_handler)
-        self.win.bind("e", self.e_handler)
-        self.win.bind("d", self.d_handler)
         self.win.bind("+", self.plus_handler)
         self.win.bind("-", self.minus_handler)
         self.win.bind("*", self.star_handler)
@@ -130,30 +113,6 @@ class lemin_screen:
         self.stack.insert(0, self.scale_canvas)
         self.redraw_w = event.width
         self.redraw_h = event.height
-
-    def space_handler(self, event):
-        self.stack.insert(0, self.play_pause)
-
-    def left_handler(self, event):
-        self.stack.insert(0, self.back_one_turn)
-
-    def right_handler(self, event):
-        self.stack.insert(0, self.forward_one_turn)
-
-    def up_handler(self, event):
-        self.stack.insert(0, self.speed_up)
-
-    def down_handler(self, event):
-        self.stack.insert(0, self.speed_down)
-
-    def r_handler(self, event):
-        self.stack.insert(0, self.reset)
-
-    def e_handler(self, event):
-        self.stack.insert(0, self.go_to_end)
-
-    def d_handler(self, event):
-        self.debug()
     
     def plus_handler(self, event):
         self.stack.insert(0, self.compress_map)
@@ -168,68 +127,6 @@ class lemin_screen:
         self.update = U_REDRAW
         self.canvas_w = self.redraw_w
         self.canvas_h = self.redraw_h
-
-    def play_pause(self):
-        self.play = True if self.play == False else False
-
-    def back_one_turn(self):
-        if self.step > 0:
-            self.step = 0
-        elif self.turn > 0:
-            self.turn -= 1
-        self.play = False
-        self.update = self.update_update(U_REFRESH)
-
-    def forward_one_turn(self):
-        if self.turn < self.game_len - 1:
-            self.turn += 1
-            self.play = False
-            self.step = 0
-            self.update = self.update_update(U_REFRESH)
-
-    def reset(self):
-        self.play = False
-        self.step = 0
-        self.turn = 0
-        self.update = self.update_update(U_REFRESH)
-
-    def go_to_end(self):
-        self.play = False
-        self.step = 0
-        self.turn = self.game_len - 1
-        self.update = self.update_update(U_REFRESH)
-
-    def speed_up(self):
-        if self.framec > G_FRAMEC_MIN:
-            orig_framec = self.framec
-            self.framec -= G_FRAMEC_STEP
-            if self.step > 0 and self.turn < self.game_len - 1:
-                self.step = (self.step / orig_framec) * self.framec
-                self.update = self.update_update(U_MOVE)
-
-    def speed_down(self):
-        if self.framec < G_FRAMEC_MAX:
-            orig_framec = self.framec
-            self.framec += G_FRAMEC_STEP
-            if self.step > 0:
-                self.step = (self.step / orig_framec) * self.framec
-                self.update = self.update_update(U_MOVE)
-
-    def debug(self):
-        print("self.turn:", self.turn, "/", self.game_len)
-        print("self.step:", self.step)
-        print("self.play:", "True" if self.play == True else "False")
-        print("self.update:",\
-        "U_NONE" if self.update == U_NONE else\
-        "U_WAIT" if self.update == U_WAIT else\
-        "U_REFRESH" if self.update == U_REFRESH else\
-        "U_MOVE" if self.update == U_MOVE else\
-        "U_REDRAW" if self.update == U_REDRAW else\
-        "ERROR")
-        print("len(self.stack)", len(self.stack))
-        print("self.stack:", self.stack)
-        print("self.grid.w_comp =", self.grid.w_comp)
-        print("self.grid.h_comp =", self.grid.h_comp)
 
     def compress_map(self):
         self.grid.w_comp = 5 if self.grid.w_comp < 5 else\
@@ -399,24 +296,6 @@ class lemin_screen:
             self.can.delete(ant)
         self.ants.clear()
 
-    def play_game(self):
-        self.async_actions()
-        if self.play == True and self.update != U_WAIT:
-            if self.turn < self.game_len - 1:
-                self.step += 1
-                if self.step == 1:
-                    self.update = self.update_update(U_MOVE)
-                elif self.step < self.framec:
-                    self.update = self.update_update(U_REFRESH)
-                else:
-                    self.step = 0
-                    self.turn += 1
-                    self.update = self.update_update(U_REFRESH)
-            else:
-                self.play = False
-        self.update_screen()
-        self.win.after(1, self.play_game)
-
     def update_update(self, upid):
         return upid if self.update < upid else self.update
 
@@ -451,12 +330,3 @@ class lemin_screen:
                 self.waitc -= 1
             else:
                 self.update = U_NONE
-
-def run_visu(lmap, game):
-    # init visual data
-    lscr = lemin_screen(lmap, game)
-    lscr.init_canvas()
-
-    # main loop
-    lscr.win.after(0, lscr.play_game)
-    lscr.win.mainloop()

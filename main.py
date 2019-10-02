@@ -4,7 +4,7 @@ from lemin_map_parser import *
 from lemin_game_parser import *
 from lemin_map_checker import *
 from lemin_game_checker import *
-from lemin_screen import *
+from lemin_player import *
 
 lmap, lc = lemin_map_parser()
 if lmap == None or lemin_map_checker(lmap):
@@ -14,4 +14,4 @@ game = lemin_game_parser(lmap, lc)
 if game == None or lemin_game_checker(game, lmap):
     eprint("error: invalid solution")
     exit()
-run_visu(lmap, game)
+play_lemin_game(lmap, game)
