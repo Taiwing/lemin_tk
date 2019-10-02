@@ -4,6 +4,7 @@ from tkinter import *
 from tooltip import *
 from utils import *
 from map_compressor import *
+from used_rooms import *
 
 # update states
 U_NONE = 0
@@ -72,7 +73,10 @@ class vdata:
         self.antn = lmap.antn
         self.links = []
         self.rooms = self.init_vrooms(lmap)
-        self.roomn = lmap.size
+        self.unused_rooms = {}
+        self.print_unused = True
+        self.roomn = len(self.rooms)
+        tag_used_rooms(game, self.rooms)
         # update state
         self.update = U_NONE
         # asynchronous actions stack (FIFO)
@@ -99,8 +103,9 @@ class vdata:
     def init_canvas(self):
         self.get_min_grid()
         if self.big_grid_w * self.big_grid_h < self.roomn:
-            eprint("error: map too big for the screen")
-            exit()
+            if self.big_grid_w * self.big_grid_h < self.roomn:
+                eprint("error: map too big for the screen")
+                exit()
         elif self.big_grid_w < self.grid_w or self.big_grid_h < self.grid_h:
             compress_coordinates(self, compression="min")
         self.build_default_grid()
@@ -149,6 +154,7 @@ class vdata:
         self.win.bind("d", self.d_handler)
         self.win.bind("+", self.plus_handler)
         self.win.bind("-", self.minus_handler)
+        self.win.bind("*", self.star_handler)
         
     def configure_handler(self, event):
         self.stack.insert(0, self.scale_canvas)
@@ -184,6 +190,9 @@ class vdata:
 
     def minus_handler(self, event):
         self.stack.insert(0, self.uncompress_map)
+
+    def star_handler(self, event):
+        self.stack.insert(0, self.toggle_print_unused_rooms)
 
     def scale_canvas(self):
         self.update = U_REDRAW
@@ -269,6 +278,15 @@ class vdata:
         compress_coordinates(self, compression="cust",\
         w_comp=self.w_comp, h_comp=self.h_comp)
         self.update = U_REDRAW
+    
+    def toggle_print_unused_rooms(self):
+        if self.print_unused == True:
+            self.print_unused = False
+            remove_unused_rooms(self)
+        else:
+            self.print_unused = True
+            restore_unused_rooms(self)
+        self.update = U_REDRAW
 
     def redraw(self):
         self.build_canvas_grid()
@@ -337,6 +355,9 @@ class vdata:
         for r in self.rooms:
             self.can.delete(self.rooms[r].shape)
             self.rooms[r].shape = None
+        for r in self.unused_rooms:
+            self.can.delete(self.unused_rooms[r].shape)
+            self.unused_rooms[r].shape = None
         for link in self.links:
             self.can.delete(link)
         self.links.clear()
@@ -358,7 +379,7 @@ class vdata:
     
     def draw_links(self, r):
         for l in self.rooms[r].links:
-            if self.rooms[l].shape == None:
+            if l not in self.unused_rooms and self.rooms[l].shape == None:
                 x1, y1, x2, y2 = self.link_coords(self.rooms[r].x,\
                 self.rooms[r].y, self.rooms[l].x, self.rooms[l].y)
                 link = self.can.create_line(x1, y1, x2, y2,\

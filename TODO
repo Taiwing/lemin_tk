@@ -1,12 +1,6 @@
 - refactor the visualizer in at least 3 parts
   - the map_shower that will just print the map (the core visualizer), make
     it so it can be used by the future map_editor
-  - and a new function to remove unused rooms (just add a "used" state to
-    the rooms), in fact, just make it an option of the visualizer (if the
-	command is used in the map file it should also be possible to do that
-	in the map editor)
-- when the map is still too big, try to only print used rooms,
-  and eventually also compress the map
 - maybe queue the room collisions in compress coordinates to give priority
   to original coordinates (in the map compressor)
 - add a settings menu and a settings file to tweak lemin_tk's behavior
