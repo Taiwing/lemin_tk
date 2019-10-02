@@ -4,6 +4,7 @@ from tkinter import *
 from tooltip import *
 from utils import *
 from lemin_map import *
+from lemin_grid import *
 from map_compressor import *
 from used_rooms import *
 
@@ -48,27 +49,9 @@ class vdata:
         self.orig_x = 0
         self.orig_y = 0
         # grid data
-        self.orig_w = lmap.orig_w # TODO: delete this once the grid data struct is created
-        self.orig_h = lmap.orig_h
-        self.grid_w = self.orig_w
-        self.grid_h = self.orig_h
-        self.w_comp = 0
-        self.h_comp = 0
-        self.w_comp_min = 0
-        self.h_comp_min = 0
-        # biggest printable grid
-        self.big_grid_w = (self.screen_width // G_SIDE_MIN) - 2
-        self.big_grid_h = (self.screen_height // G_SIDE_MIN) - 2
-        # biggest grid for current map
-        self.grid_w_max = self.big_grid_w if self.orig_w > self.big_grid_w\
-        else self.orig_w
-        self.grid_h_max = self.big_grid_h if self.orig_h > self.big_grid_h\
-        else self.orig_h
-        # smallest grid big enough to fit all rooms
-        self.grid_w_min = 0
-        self.grid_h_min = 0
+        # TODO: remove G_SIDE_MIN from grid parameters when config struct is on
+        self.grid = lemin_grid(lmap, self.screen_width, self.screen_height, G_SIDE_MIN)
         # graphical objects
-        self.grid = []
         self.ants = []
         self.unused_rooms = {}
         self.print_unused = G_PRINT_UNUSED_DEF
@@ -92,32 +75,35 @@ class vdata:
 
     def init_canvas(self):
         self.get_min_grid()
-        if self.big_grid_w * self.big_grid_h < self.roomn:
-            if self.big_grid_w * self.big_grid_h < self.roomn:
+        if self.grid.big_width * self.grid.big_height < self.roomn:
+            # TODO: add a call to remove_unused here and check if it works
+            # TODO: also replace the next elif by a if so that it always
+            # TODO: compresses the map if needed
+            if self.grid.big_width * self.grid.big_height < self.roomn:
                 eprint("error: map too big for the screen")
                 exit()
-        elif self.big_grid_w < self.grid_w or self.big_grid_h < self.grid_h:
+        elif self.grid.big_width < self.grid.width or self.grid.big_height < self.grid.height:
             compress_coordinates(self, compression="min")
         self.build_canvas()
-        self.w_comp_min = self.w_comp
-        self.h_comp_min = self.h_comp
-        win_w_min = (self.grid_w + 2) * G_SIDE_MIN
-        win_h_min = (self.grid_h + 2) * G_SIDE_MIN
+        self.grid.w_comp_min = self.grid.w_comp
+        self.grid.h_comp_min = self.grid.h_comp
+        win_w_min = (self.grid.width + 2) * G_SIDE_MIN
+        win_h_min = (self.grid.height + 2) * G_SIDE_MIN
         self.win.minsize(win_w_min, win_h_min)
 
     def get_min_grid(self):
         scale = self.screen_width / self.screen_height
-        while self.grid_w_min * self.grid_h_min < self.roomn:
-            self.grid_w_min += 1
-            self.grid_h_min = int(self.grid_w_min / scale)
+        while self.grid.width_min * self.grid.height_min < self.roomn:
+            self.grid.width_min += 1
+            self.grid.height_min = int(self.grid.width_min / scale)
 
     def build_canvas(self):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 
         self.canvas_h = self.screen_height / G_SCREEN_DIV 
         if self.get_side_size():
             # if default window is not big enough
-            self.canvas_w = (self.grid_w + 2) * G_SIDE_MIN
-            self.canvas_h = (self.grid_h + 2) * G_SIDE_MIN
+            self.canvas_w = (self.grid.width + 2) * G_SIDE_MIN
+            self.canvas_h = (self.grid.height + 2) * G_SIDE_MIN
             self.get_side_size()
         self.can = Canvas(self.win, width=self.canvas_w, height=self.canvas_h,\
         bg=BACKGROUND_COLOR)
@@ -126,10 +112,10 @@ class vdata:
         self.can.update()
 
     def get_side_size(self):
-        self.side = min(self.canvas_w / (self.grid_w + 2),\
-        self.canvas_h / (self.grid_h + 2))
-        self.orig_x = (self.canvas_w - (self.grid_w * self.side)) / 2
-        self.orig_y = (self.canvas_h - (self.grid_h * self.side)) / 2
+        self.side = min(self.canvas_w / (self.grid.width + 2),\
+        self.canvas_h / (self.grid.height + 2))
+        self.orig_x = (self.canvas_w - (self.grid.width * self.side)) / 2
+        self.orig_y = (self.canvas_h - (self.grid.height * self.side)) / 2
         return 1 if self.side < G_SIDE_MIN else 0
 
     def init_actions(self):
@@ -248,25 +234,25 @@ class vdata:
         "ERROR")
         print("len(self.stack)", len(self.stack))
         print("self.stack:", self.stack)
-        print("self.w_comp =", self.w_comp)
-        print("self.h_comp =", self.h_comp)
+        print("self.grid.w_comp =", self.grid.w_comp)
+        print("self.grid.h_comp =", self.grid.h_comp)
 
     def compress_map(self):
-        self.w_comp = 5 if self.w_comp < 5 else\
-        self.w_comp + 5 if self.w_comp + 5 < 100 else 100
-        self.h_comp = 5 if self.h_comp < 5 else\
-        self.h_comp + 5 if self.h_comp + 5 < 100 else 100
+        self.grid.w_comp = 5 if self.grid.w_comp < 5 else\
+        self.grid.w_comp + 5 if self.grid.w_comp + 5 < 100 else 100
+        self.grid.h_comp = 5 if self.grid.h_comp < 5 else\
+        self.grid.h_comp + 5 if self.grid.h_comp + 5 < 100 else 100
         compress_coordinates(self, compression="cust",\
-        w_comp=self.w_comp, h_comp=self.h_comp)
+        w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
         self.update = U_REDRAW
 
     def uncompress_map(self):
-        self.w_comp = self.w_comp_min if self.w_comp - 5 < self.w_comp_min\
-        else self.w_comp - 5
-        self.h_comp = self.h_comp_min if self.h_comp - 5 < self.h_comp_min\
-        else self.h_comp - 5
+        self.grid.w_comp = self.grid.w_comp_min if self.grid.w_comp - 5 < self.grid.w_comp_min\
+        else self.grid.w_comp - 5
+        self.grid.h_comp = self.grid.h_comp_min if self.grid.h_comp - 5 < self.grid.h_comp_min\
+        else self.grid.h_comp - 5
         compress_coordinates(self, compression="cust",\
-        w_comp=self.w_comp, h_comp=self.h_comp)
+        w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
         self.update = U_REDRAW
     
     def toggle_print_unused_rooms(self):
@@ -355,17 +341,17 @@ class vdata:
     
     def draw_grid(self):
         self.delete_grid()
-        for i in range(0, self.grid_w + 1):
+        for i in range(0, self.grid.width + 1):
             bar = self.can.create_line(self.orig_x + (self.side * i),\
             self.orig_y, self.orig_x + (self.side * i),\
-            self.orig_y + (self.grid_h * self.side)) 
-            self.grid.append(bar)
-        for i in range(0, self.grid_h + 1):
+            self.orig_y + (self.grid.height * self.side)) 
+            self.grid.shapes.append(bar)
+        for i in range(0, self.grid.height + 1):
             bar = self.can.create_line(self.orig_x,\
             self.orig_y + (self.side * i),\
-            self.orig_x + (self.grid_w * self.side),\
+            self.orig_x + (self.grid.width * self.side),\
             self.orig_y + (self.side * i))
-            self.grid.append(bar)
+            self.grid.shapes.append(bar)
         self.can.pack()
     
     def draw_links(self, r):
@@ -388,9 +374,9 @@ class vdata:
         self.lmap.rooms[r].shape = room
     
     def delete_grid(self):
-        for bar in self.grid:
+        for bar in self.grid.shapes:
             self.can.delete(bar)
-        self.grid.clear()
+        self.grid.shapes.clear()
 
     # compute the coordinates to draw the game from grid coordinates
     def grid_to_graphical(self, g_x, g_y):

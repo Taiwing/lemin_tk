@@ -16,8 +16,8 @@ def remove_unused_rooms(vda):
     for r in unused:
         vda.unused_rooms[r] = vda.lmap.rooms.pop(r)
     vda.roomn = len(vda.lmap.rooms)
-    vda.grid_w_min = 0
-    vda.grid_h_min = 0
+    vda.grid.width_min = 0
+    vda.grid.height_min = 0
     vda.get_min_grid()
 
 def restore_unused_rooms(vda):
@@ -30,12 +30,12 @@ def restore_unused_rooms(vda):
     for r in vda.lmap.rooms:
         vda.lmap.rooms[r].x = vda.lmap.rooms[r].orig_x
         vda.lmap.rooms[r].y = vda.lmap.rooms[r].orig_y
-    vda.grid_w = vda.orig_w
-    vda.grid_h = vda.orig_h
-    vda.w_comp = 0
-    vda.h_comp = 0
-    vda.grid_w_min = 0
-    vda.grid_h_min = 0
+    vda.grid.width = vda.grid.orig_w
+    vda.grid.height = vda.grid.orig_h
+    vda.grid.w_comp = 0
+    vda.grid.h_comp = 0
+    vda.grid.width_min = 0
+    vda.grid.height_min = 0
     vda.get_min_grid()
-    if vda.big_grid_w < vda.grid_w or vda.big_grid_h < vda.grid_h:
+    if vda.grid.big_width < vda.grid.width or vda.grid.big_height < vda.grid.height:
         compress_coordinates(vda, compression="min")
