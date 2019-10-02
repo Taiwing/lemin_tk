@@ -98,7 +98,7 @@ class vdata:
                 exit()
         elif self.big_grid_w < self.grid_w or self.big_grid_h < self.grid_h:
             compress_coordinates(self, compression="min")
-        self.build_default_grid()
+        self.build_canvas()
         self.w_comp_min = self.w_comp
         self.h_comp_min = self.h_comp
         win_w_min = (self.grid_w + 2) * G_SIDE_MIN
@@ -111,21 +111,21 @@ class vdata:
             self.grid_w_min += 1
             self.grid_h_min = int(self.grid_w_min / scale)
 
-    def build_default_grid(self):
+    def build_canvas(self):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 
         self.canvas_h = self.screen_height / G_SCREEN_DIV 
-        if self.build_canvas_grid():
+        if self.get_side_size():
             # if default window is not big enough
             self.canvas_w = (self.grid_w + 2) * G_SIDE_MIN
             self.canvas_h = (self.grid_h + 2) * G_SIDE_MIN
-            self.build_canvas_grid()
+            self.get_side_size()
         self.can = Canvas(self.win, width=self.canvas_w, height=self.canvas_h,\
         bg=BACKGROUND_COLOR)
         self.can.pack(side=TOP, fill=BOTH, expand=1)
         self.init_actions()
         self.can.update()
 
-    def build_canvas_grid(self):
+    def get_side_size(self):
         self.side = min(self.canvas_w / (self.grid_w + 2),\
         self.canvas_h / (self.grid_h + 2))
         self.orig_x = (self.canvas_w - (self.grid_w * self.side)) / 2
@@ -279,7 +279,7 @@ class vdata:
         self.update = U_REDRAW
 
     def redraw(self):
-        self.build_canvas_grid()
+        self.get_side_size()
         self.draw_map()
         self.draw_ants()
         if self.step > 0:
