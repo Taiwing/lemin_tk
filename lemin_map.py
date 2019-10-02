@@ -10,6 +10,7 @@ class lemin_map:
         self.antn = 0
         self.size = 0 # number of rooms
         self.rooms = {}
+        self.unused_rooms = {}
         self.links = {}
         self.start = ""
         self.end = ""

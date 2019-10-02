@@ -33,7 +33,7 @@ END_ROOM_COLOR = "DarkGoldenrod1"
 LINK_COLOR = "black"
 ANT_COLOR = "red"
 
-class vdata:
+class lemin_screen:
     def __init__(self, lmap, game):
         # window data
         self.win = Tk()
@@ -53,9 +53,8 @@ class vdata:
         self.grid = lemin_grid(lmap, self.screen_width, self.screen_height, G_SIDE_MIN)
         # graphical objects
         self.ants = []
-        self.unused_rooms = {}
         self.print_unused = G_PRINT_UNUSED_DEF
-        self.roomn = len(lmap.rooms)
+        self.roomn = len(lmap.rooms) # only printed rooms (all by default)
         tag_used_rooms(game, lmap.rooms)
         # update state
         self.update = U_NONE
@@ -324,11 +323,13 @@ class vdata:
     def delete_map(self):
         self.delete_grid()
         for r in self.lmap.rooms:
-            self.can.delete(self.lmap.rooms[r].shape)
+            if self.lmap.rooms[r].shape != None:
+                self.can.delete(self.lmap.rooms[r].shape)
             self.lmap.rooms[r].shape = None
-        for r in self.unused_rooms:
-            self.can.delete(self.unused_rooms[r].shape)
-            self.unused_rooms[r].shape = None
+        for r in self.lmap.unused_rooms:
+            if self.lmap.unused_rooms[r].shape != None:
+                self.can.delete(self.lmap.unused_rooms[r].shape)
+            self.lmap.unused_rooms[r].shape = None
         for l in self.lmap.links:
             if self.lmap.links[l].shape != None:
                 self.can.delete(self.lmap.links[l].shape)
@@ -352,7 +353,7 @@ class vdata:
     def draw_links(self, r):
         for l in self.lmap.rooms[r].links:
             name = link_name(r, l)
-            if l not in self.unused_rooms and self.lmap.links[name].shape == None:
+            if l not in self.lmap.unused_rooms and self.lmap.links[name].shape == None:
                 x1, y1, x2, y2 = self.link_coords(self.lmap.rooms[r].x,\
                 self.lmap.rooms[r].y, self.lmap.rooms[l].x, self.lmap.rooms[l].y)
                 link = self.can.create_line(x1, y1, x2, y2,\
@@ -453,9 +454,9 @@ class vdata:
 
 def run_visu(lmap, game):
     # init visual data
-    vda = vdata(lmap, game)
-    vda.init_canvas()
+    lscr = lemin_screen(lmap, game)
+    lscr.init_canvas()
 
     # main loop
-    vda.win.after(0, vda.play_game)
-    vda.win.mainloop()
+    lscr.win.after(0, lscr.play_game)
+    lscr.win.mainloop()

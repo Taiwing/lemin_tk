@@ -4,7 +4,7 @@ from lemin_map_parser import *
 from lemin_game_parser import *
 from lemin_map_checker import *
 from lemin_game_checker import *
-from visu import *
+from lemin_screen import *
 
 lmap, lc = lemin_map_parser()
 if lmap == None or lemin_map_checker(lmap):

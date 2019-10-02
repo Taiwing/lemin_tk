@@ -8,34 +8,34 @@ def tag_used_rooms(game, rooms):
             if "used" not in rooms[move].attrs:
                 rooms[move].attrs.append("used")
 
-def remove_unused_rooms(vda):
+def remove_unused_rooms(lscr):
     unused = []
-    for r in vda.lmap.rooms:
-        if "used" not in vda.lmap.rooms[r].attrs:
+    for r in lscr.lmap.rooms:
+        if "used" not in lscr.lmap.rooms[r].attrs:
             unused.append(r)
     for r in unused:
-        vda.unused_rooms[r] = vda.lmap.rooms.pop(r)
-    vda.roomn = len(vda.lmap.rooms)
-    vda.grid.width_min = 0
-    vda.grid.height_min = 0
-    vda.grid.get_min(vda.screen_width, vda.screen_height, vda.roomn)
+        lscr.lmap.unused_rooms[r] = lscr.lmap.rooms.pop(r)
+    lscr.roomn = len(lscr.lmap.rooms)
+    lscr.grid.width_min = 0
+    lscr.grid.height_min = 0
+    lscr.grid.get_min(lscr.screen_width, lscr.screen_height, lscr.roomn)
 
-def restore_unused_rooms(vda):
+def restore_unused_rooms(lscr):
     unused = []
-    for r in vda.unused_rooms:
+    for r in lscr.lmap.unused_rooms:
         unused.append(r)
     for r in unused:
-        vda.lmap.rooms[r] = vda.unused_rooms.pop(r)
-    vda.roomn = len(vda.lmap.rooms)
-    for r in vda.lmap.rooms:
-        vda.lmap.rooms[r].x = vda.lmap.rooms[r].orig_x
-        vda.lmap.rooms[r].y = vda.lmap.rooms[r].orig_y
-    vda.grid.width = vda.grid.orig_w
-    vda.grid.height = vda.grid.orig_h
-    vda.grid.w_comp = 0
-    vda.grid.h_comp = 0
-    vda.grid.width_min = 0
-    vda.grid.height_min = 0
-    vda.grid.get_min(vda.screen_width, vda.screen_height, vda.roomn)
-    if vda.grid.big_width < vda.grid.width or vda.grid.big_height < vda.grid.height:
-        compress_coordinates(vda, compression="min")
+        lscr.lmap.rooms[r] = lscr.lmap.unused_rooms.pop(r)
+    lscr.roomn = len(lscr.lmap.rooms)
+    for r in lscr.lmap.rooms:
+        lscr.lmap.rooms[r].x = lscr.lmap.rooms[r].orig_x
+        lscr.lmap.rooms[r].y = lscr.lmap.rooms[r].orig_y
+    lscr.grid.width = lscr.grid.orig_w
+    lscr.grid.height = lscr.grid.orig_h
+    lscr.grid.w_comp = 0
+    lscr.grid.h_comp = 0
+    lscr.grid.width_min = 0
+    lscr.grid.height_min = 0
+    lscr.grid.get_min(lscr.screen_width, lscr.screen_height, lscr.roomn)
+    if lscr.grid.big_width < lscr.grid.width or lscr.grid.big_height < lscr.grid.height:
+        compress_coordinates(lscr, compression="min")
