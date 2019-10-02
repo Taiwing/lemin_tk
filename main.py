@@ -14,5 +14,4 @@ game = lemin_game_parser(lmap, lc)
 if game == None or lemin_game_checker(game, lmap):
     eprint("error: invalid solution")
     exit()
-#print(game.mprint())
 run_visu(lmap, game)

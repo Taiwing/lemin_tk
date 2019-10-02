@@ -3,6 +3,7 @@
 from tkinter import *
 from tooltip import *
 from utils import *
+from lemin_map import *
 from map_compressor import *
 from used_rooms import *
 
@@ -69,7 +70,7 @@ class vdata:
         self.grid = []
         self.ants = []
         self.antn = lmap.antn
-        self.links = []
+        self.links = lmap.links
         self.rooms = lmap.rooms
         self.unused_rooms = {}
         self.print_unused = True
@@ -92,12 +93,6 @@ class vdata:
         self.play = False
         self.turn = 0
 
-    def init_vrooms(self, lmap):
-        vrooms = {}
-        for r in lmap.rooms:
-            vrooms[r] = vroom(lmap.rooms[r], lmap.minx, lmap.miny)
-        return vrooms
- 
     def init_canvas(self):
         self.get_min_grid()
         if self.big_grid_w * self.big_grid_h < self.roomn:
@@ -356,9 +351,10 @@ class vdata:
         for r in self.unused_rooms:
             self.can.delete(self.unused_rooms[r].shape)
             self.unused_rooms[r].shape = None
-        for link in self.links:
-            self.can.delete(link)
-        self.links.clear()
+        for l in self.links:
+            if self.links[l].shape != None:
+                self.can.delete(self.links[l].shape)
+            self.links[l].shape = None
     
     def draw_grid(self):
         self.delete_grid()
@@ -377,12 +373,13 @@ class vdata:
     
     def draw_links(self, r):
         for l in self.rooms[r].links:
-            if l not in self.unused_rooms and self.rooms[l].shape == None:
+            name = link_name(r, l)
+            if l not in self.unused_rooms and self.links[name].shape == None:
                 x1, y1, x2, y2 = self.link_coords(self.rooms[r].x,\
                 self.rooms[r].y, self.rooms[l].x, self.rooms[l].y)
                 link = self.can.create_line(x1, y1, x2, y2,\
                 fill=LINK_COLOR, width=self.side/15)
-                self.links.append(link)
+                self.links[name].shape = link
     
     def draw_room(self, r):
         x1, y1, x2, y2 = self.room_coords(self.rooms[r].x,\

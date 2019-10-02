@@ -10,7 +10,7 @@ class lemin_map:
         self.antn = 0
         self.size = 0 # number of rooms
         self.rooms = {}
-        self.links = []
+        self.links = {}
         self.start = ""
         self.end = ""
         self.orig_w = 0
@@ -54,17 +54,18 @@ class lemin_map:
             else:
                 map_eprint("\"" + com + "\" unknown command")
 
-    def add_link(self, link, commands):
+    def add_link(self, lnk, commands):
         commands.clear() #until link commands are a reality
-        if link[0] not in self.rooms or link[1] not in self.rooms:
-            map_eprint("\"" + link[0] + "-" + link[1] + "\" is invalid") 
+        name = link_name(lnk[0], lnk[1])
+        if lnk[0] not in self.rooms or lnk[1] not in self.rooms:
+            map_eprint("\"" + lnk[0] + "-" + lnk[1] + "\" is invalid") 
             exit()
-        elif link in self.links or link[::-1] in self.links:
-            map_eprint("\"" + link[0] + "-" + link[1] + "\" already exists") 
+        elif name in self.links:
+            map_eprint("\"" + lnk[0] + "-" + lnk[1] + "\" already exists") 
         else:
-            self.links.append(link)
-            self.rooms[link[0]].links.append(link[1])
-            self.rooms[link[1]].links.append(link[0])
+            self.links[name] = link()
+            self.rooms[lnk[0]].links.append(lnk[1])
+            self.rooms[lnk[1]].links.append(lnk[0])
 
     def mprint(self):
         ret = "antn = " + str(self.antn) + "\n"\
@@ -77,7 +78,7 @@ class lemin_map:
             ret += self.rooms[room].rprint()
         ret += "\nlinks:\n"
         for link in self.links:
-            ret += str(link) + "\n"
+            ret += link + "\n"
         return ret
 
 class room:
@@ -103,3 +104,14 @@ class room:
         ret += "links: " + str(self.links) + "\n"
         ret += "attributes: " + str(self.attrs) + "\n"
         return ret
+
+class link:
+    def __init__(self):
+        # graphical object
+        self.shape = None
+
+def link_name(a, b):
+    if a < b:
+        return a + "-" + b
+    else:
+        return b + "-" + a
