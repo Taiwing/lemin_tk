@@ -9,8 +9,8 @@ class lemin_grid:
         self.width = self.orig_w
         self.height = self.orig_h
         # smallest grid big enough to fit all rooms
-        self.width_min = 0
-        self.height_min = 0
+        self.width_min = 2
+        self.height_min = 1
         # biggest printable grid
         self.big_width = (screen_w // G_SIDE_MIN) - 2
         self.big_height = (screen_h // G_SIDE_MIN) - 2
@@ -29,6 +29,7 @@ class lemin_grid:
 
     def get_min(self, screen_w, screen_h, roomn):
         scale = screen_w / screen_h
+        roomn = roomn if roomn > 1 else 2 # if the map is empty
         while self.width_min * self.height_min < roomn:
             self.width_min += 1
             self.height_min = int(self.width_min / scale)
