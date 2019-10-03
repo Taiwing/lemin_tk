@@ -1,6 +1,3 @@
-- when changing the size of the grid and/or the number of rooms (when toggling
-  between printing and not printing unused rooms), and/or when grid_min is
-  modified, change the minimum size of the window so that it fits the new grid
 - maybe queue the room collisions in compress coordinates to give priority
   to original coordinates (in the map compressor)
 - add a settings menu and a settings file to tweak lemin_tk's behavior

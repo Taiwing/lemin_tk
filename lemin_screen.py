@@ -80,9 +80,7 @@ class lemin_screen:
         self.build_canvas(init_mode_actions)
         self.grid.w_comp_min = self.grid.w_comp
         self.grid.h_comp_min = self.grid.h_comp
-        win_w_min = (self.grid.width + 2) * G_SIDE_MIN
-        win_h_min = (self.grid.height + 2) * G_SIDE_MIN
-        self.win.minsize(win_w_min, win_h_min)
+        self.set_min_window()
 
     def build_canvas(self, init_mode_actions):
         self.canvas_w = self.screen_width / G_SCREEN_DIV 
@@ -98,6 +96,11 @@ class lemin_screen:
         self.init_actions()
         init_mode_actions()
         self.can.update()
+
+    def set_min_window(self):
+        win_w_min = (self.grid.width + 2) * G_SIDE_MIN
+        win_h_min = (self.grid.height + 2) * G_SIDE_MIN
+        self.win.minsize(win_w_min, win_h_min)
 
     def get_side_size(self):
         self.side = min(self.canvas_w / (self.grid.width + 2),\
@@ -138,6 +141,7 @@ class lemin_screen:
         self.grid.h_comp + 5 if self.grid.h_comp + 5 < 100 else 100
         compress_coordinates(self, compression="cust",\
         w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
+        self.set_min_window()
         self.update = U_REDRAW
 
     def uncompress_map(self):
@@ -147,6 +151,7 @@ class lemin_screen:
         else self.grid.h_comp - 5
         compress_coordinates(self, compression="cust",\
         w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
+        self.set_min_window()
         self.update = U_REDRAW
     
     def toggle_print_unused_rooms(self):
@@ -156,6 +161,7 @@ class lemin_screen:
         else:
             self.print_unused = True
             restore_unused_rooms(self)
+            self.set_min_window()
         self.update = U_REDRAW
     
     def draw_map(self):
