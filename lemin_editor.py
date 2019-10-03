@@ -16,6 +16,9 @@ class lemin_editor:
         self.move, self.refresh, self.wait)
         self.lscr.init_canvas(self.init_editor_actions)
         self.lscr.win.after(0, self.edit_map)
+        # edit data
+        self.cur_x = 0
+        self.cur_y = 0
 
     def new_map(self):
         lmap = lemin_map()
@@ -29,39 +32,78 @@ class lemin_editor:
         self.lscr.win.bind("<Right>", self.right_handler)
         self.lscr.win.bind("<Up>", self.up_handler)
         self.lscr.win.bind("<Down>", self.down_handler)
-        self.lscr.win.bind("p", self.p_handler)
+        self.lscr.win.bind("s", self.s_handler)
+        self.lscr.win.bind("e", self.e_handler)
         self.lscr.win.bind("r", self.r_handler)
+        self.lscr.win.bind("l", self.l_handler)
         self.lscr.win.bind("u", self.u_handler)
         self.lscr.win.bind("d", self.d_handler)
 
     def left_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+        self.lscr.stack.insert(0, self.move_left)
 
     def right_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+        self.lscr.stack.insert(0, self.move_right)
 
     def up_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+        self.lscr.stack.insert(0, self.move_up)
 
     def down_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+        self.lscr.stack.insert(0, self.move_down)
 
-    def p_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+    def s_handler(self, event):
+        self.lscr.stack.insert(0, self.put_start)
+
+    def e_handler(self, event):
+        self.lscr.stack.insert(0, self.put_end)
 
     def r_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+        self.lscr.stack.insert(0, self.put_room)
+
+    def l_handler(self, event):
+        self.lscr.stack.insert(0, self.link)
 
     def u_handler(self, event):
-        self.lscr.stack.insert(0, self.do_nothing)
+        self.lscr.stack.insert(0, self.unlink)
 
     def d_handler(self, event):
         self.debug()
 
-    # TODO: replace every do_nothing with a proper function
-    def do_nothing(self): # TEMP
+    def move_left(self):
+        if self.cur_x > 0:
+            self.cur_x -= 1
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_right(self):
+        if self.cur_x < self.lscr.grid.width - 1:
+            self.cur_x += 1
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_up(self):
+        if self.cur_y > 0:
+            self.cur_y -= 1
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_down(self):
+        if self.cur_y < self.lscr.grid.height - 1:
+            self.cur_y += 1
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def put_start(self):
+        pass
+
+    def put_end(self):
         pass
     
+    def put_room(self):
+        pass
+
+    def link(self):
+        pass
+
+    def unlink(self):
+        pass
+
     def debug(self):
         print("self.lscr.update:",\
         "U_NONE" if self.lscr.update == U_NONE else\
@@ -75,7 +117,9 @@ class lemin_editor:
         print("self.lscr.grid.w_comp =", self.lscr.grid.w_comp)
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
 
-    ## drawing functions specific to lemin_editor  ##
+#    ## drawing functions specific to lemin_editor  ##
+#    def draw_cursor(self):
+
 
 
     ## update_screen functions ##
