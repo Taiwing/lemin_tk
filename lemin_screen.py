@@ -15,23 +15,16 @@ U_REFRESH = 2
 U_MOVE = 3
 U_REDRAW = 4
 
-# graphical constants # TODO: config structure
+# graphical constants
 G_PRINT_GRID = True
 G_PRINT_UNUSED_DEF = True
 G_SIDE_MIN = 10
-G_SIDE_DEF = 50 # not used yet
 G_SCREEN_DIV = 2 # use half the screen by default
-G_FRAMEC_MIN = 10
-G_FRAMEC_MAX = 500
-G_FRAMEC_DEF = 100
-G_FRAMEC_STEP = 10 # increment or decrement speed by this value
-G_DELAY_DEF = 300 # wait time at each room
 BACKGROUND_COLOR = "DodgerBlue3"
 ROOM_COLOR = "blue"
 START_ROOM_COLOR = "purple4"
 END_ROOM_COLOR = "DarkGoldenrod1"
 LINK_COLOR = "black"
-ANT_COLOR = "red"
 
 class lemin_screen:
     def __init__(self, lmap, redrawf, movef, refreshf, waitf):
@@ -109,6 +102,8 @@ class lemin_screen:
         self.orig_y = (self.canvas_h - (self.grid.height * self.side)) / 2
         return 1 if self.side < G_SIDE_MIN else 0
 
+    ## events handling of lemin_screen ##
+
     def init_actions(self):
         self.can.bind("<Configure>", self.configure_handler)
         self.win.bind("+", self.plus_handler)
@@ -163,7 +158,8 @@ class lemin_screen:
             restore_unused_rooms(self)
             self.set_min_window()
         self.update = U_REDRAW
-    
+
+    ## drawing functions specific to lemin_screen ##
     def draw_map(self):
         self.delete_map()
         if G_PRINT_GRID:
@@ -228,7 +224,6 @@ class lemin_screen:
             self.can.delete(bar)
         self.grid.shapes.clear()
 
-    # compute the coordinates to draw the map from grid coordinates
     def grid_to_graphical(self, g_x, g_y):
         return self.orig_x + (self.side * g_x) + self.side / 2,\
         self.orig_y + (self.side * g_y) + self.side / 2
@@ -246,6 +241,7 @@ class lemin_screen:
     def update_update(self, upid):
         return upid if self.update < upid else self.update
 
+    ## main loop functions ##
     def async_actions(self):
         while len(self.stack) > 0:
             af = self.stack.pop()

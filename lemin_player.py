@@ -2,6 +2,14 @@
 
 from lemin_screen import *
 
+# graphical constants
+G_FRAMEC_MIN = 10
+G_FRAMEC_MAX = 500
+G_FRAMEC_DEF = 100
+G_FRAMEC_STEP = 10 # increment or decrement speed by this value
+G_DELAY_DEF = 300 # wait time at each room
+ANT_COLOR = "red"
+
 class lemin_player:
     def __init__(self, lmap, game):
         # lemin screen
@@ -23,6 +31,7 @@ class lemin_player:
         self.play = False
         self.turn = 0
 
+    ## event handling of lemin_player ##
     def init_player_actions(self):
         self.lscr.win.bind("<space>", self.space_handler)
         self.lscr.win.bind("<Left>", self.left_handler)
@@ -120,7 +129,6 @@ class lemin_player:
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
 
     ## drawing functions specific to lemin_player ##
-
     def ant_coords(self, g_x, g_y):
         x, y = self.lscr.grid_to_graphical(g_x, g_y)
         return x - (self.lscr.side / 8), y - (self.lscr.side / 8),\
