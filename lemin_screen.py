@@ -34,7 +34,7 @@ LINK_COLOR = "black"
 ANT_COLOR = "red"
 
 class lemin_screen:
-    def __init__(self, lmap, game):
+    def __init__(self, lmap, redrawf, movef, refreshf, waitf):
         # window data
         self.win = Tk()
         self.screen_width = self.win.winfo_screenwidth()
@@ -55,11 +55,15 @@ class lemin_screen:
         self.lmap = lmap
         self.print_unused = G_PRINT_UNUSED_DEF
         self.roomn = len(lmap.rooms) # only printed rooms (all by default)
-        tag_used_rooms(game, lmap.rooms)
         # update state
         self.update = U_NONE
         # asynchronous actions stack (FIFO)
         self.stack = []
+        # update_screen functions
+        self.redrawf = redrawf
+        self.movef = movef
+        self.refreshf = refreshf
+        self.waitf = waitf
 
     def init_canvas(self, init_mode_actions):
         self.grid.get_min(self.screen_width,\
@@ -102,7 +106,6 @@ class lemin_screen:
         self.orig_y = (self.canvas_h - (self.grid.height * self.side)) / 2
         return 1 if self.side < G_SIDE_MIN else 0
 
-    # TODO: move this to lemin_player.py
     def init_actions(self):
         self.can.bind("<Configure>", self.configure_handler)
         self.win.bind("+", self.plus_handler)
@@ -154,14 +157,6 @@ class lemin_screen:
             self.print_unused = True
             restore_unused_rooms(self)
         self.update = U_REDRAW
-
-    def redraw(self):
-        self.get_side_size()
-        self.draw_map()
-        self.draw_ants()
-        if self.step > 0:
-            self.get_steps()
-            self.draw_step()
     
     def draw_map(self):
         self.delete_map()
@@ -172,50 +167,6 @@ class lemin_screen:
         for r in self.lmap.rooms:
             self.draw_room(r)
         self.can.pack()
-    
-    # draw ants at current postition (according to self.turn)
-    def draw_ants(self):
-        self.delete_ants()
-        for i in range(self.lmap.antn):
-            r = self.game[self.turn][i]
-            x1, y1, x2, y2 = self.ant_coords(self.lmap.rooms[r].x,\
-            self.lmap.rooms[r].y)
-            ant = self.can.create_oval(x1, y1, x2, y2, fill=ANT_COLOR)
-            self.ants.append(ant)
-        self.can.pack()
-    
-    def get_steps(self):
-        self.steps.clear()
-        for i in range(self.lmap.antn):
-            # get the coordinates of the target room
-            xy = self.ant_coords(\
-            self.lmap.rooms[self.game[self.turn + 1][i]].x,\
-            self.lmap.rooms[self.game[self.turn + 1][i]].y)
-            # get the coordinates of the current room
-            cur = self.ant_coords(\
-            self.lmap.rooms[self.game[self.turn][i]].x,\
-            self.lmap.rooms[self.game[self.turn][i]].y)
-            # get increments
-            ix = (xy[0] - cur[0]) / self.framec
-            iy = (xy[1] - cur[1]) / self.framec
-            self.steps.append([cur[0], cur[1], cur[2], cur[3], ix, iy])
-
-    def draw_step(self):
-        for i in range(self.lmap.antn):
-            # move ant one frame toward the next node
-            self.can.coords(self.ants[i],\
-            self.steps[i][0] + (self.steps[i][4] * self.step),\
-            self.steps[i][1] + (self.steps[i][5] * self.step),\
-            self.steps[i][2] + (self.steps[i][4] * self.step),\
-            self.steps[i][3] + (self.steps[i][5] * self.step))
-
-    def fix(self):
-        for i in range(self.lmap.antn):
-            # fix ant precisely on the node
-            xy = self.ant_coords(\
-            self.lmap.rooms[self.game[self.turn][i]].x,\
-            self.lmap.rooms[self.game[self.turn][i]].y)
-            self.can.coords(self.ants[i], xy[0], xy[1], xy[2], xy[3])
 
     def delete_map(self):
         self.delete_grid()
@@ -271,16 +222,11 @@ class lemin_screen:
             self.can.delete(bar)
         self.grid.shapes.clear()
 
-    # compute the coordinates to draw the game from grid coordinates
+    # compute the coordinates to draw the map from grid coordinates
     def grid_to_graphical(self, g_x, g_y):
         return self.orig_x + (self.side * g_x) + self.side / 2,\
         self.orig_y + (self.side * g_y) + self.side / 2
-
-    def ant_coords(self, g_x, g_y):
-        x, y = self.grid_to_graphical(g_x, g_y)
-        return x - (self.side / 8), y - (self.side / 8),\
-        x + (self.side / 8), y + (self.side / 8) 
-
+    
     def room_coords(self, g_x, g_y):
         x, y = self.grid_to_graphical(g_x, g_y)
         return x - (self.side / 4), y - (self.side / 4),\
@@ -290,12 +236,7 @@ class lemin_screen:
         x1, y1 = self.grid_to_graphical(g_x1, g_y1)
         x2, y2 = self.grid_to_graphical(g_x2, g_y2)
         return x1, y1, x2, y2
-
-    def delete_ants(self):
-        for ant in self.ants:
-            self.can.delete(ant)
-        self.ants.clear()
-
+    
     def update_update(self, upid):
         return upid if self.update < upid else self.update
 
@@ -306,27 +247,15 @@ class lemin_screen:
 
     def update_screen(self):
         if self.update == U_REDRAW:
-            self.redraw()
+            self.redrawf()
             self.can.update()
             self.update = U_NONE
         elif self.update == U_MOVE:
-            if self.step > 0:
-                self.get_steps()
-                self.draw_step()
-            else:
-                self.fix()
+            self.movef()
             self.can.update()
             self.update = U_NONE
         elif self.update == U_REFRESH:
-            if self.step > 0:
-                self.draw_step()
-            else:
-                self.fix()
-                self.update = U_WAIT
-                self.waitc = G_DELAY_DEF
+            self.refreshf()
             self.can.update()
         elif self.update == U_WAIT:
-            if self.waitc > 0:
-                self.waitc -= 1
-            else:
-                self.update = U_NONE
+            self.waitf()

@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
-# For G_FRAMEC_DEF
 from lemin_screen import *
 
 class lemin_player:
     def __init__(self, lmap, game):
         # lemin screen
-        self.lscr = lemin_screen(lmap, game)
+        self.lscr = lemin_screen(lmap, self.redraw,\
+        self.move, self.refresh, self.wait)
+        tag_used_rooms(game, lmap.rooms)
         self.lscr.init_canvas(self.init_player_actions)
         self.lscr.win.after(0, self.play_game)
         # graphical objects
@@ -117,7 +118,93 @@ class lemin_player:
         print("self.lscr.stack:", self.lscr.stack)
         print("self.lscr.grid.w_comp =", self.lscr.grid.w_comp)
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
+
+    ## drawing functions specific to lemin_player ##
+
+    def ant_coords(self, g_x, g_y):
+        x, y = self.lscr.grid_to_graphical(g_x, g_y)
+        return x - (self.lscr.side / 8), y - (self.lscr.side / 8),\
+        x + (self.lscr.side / 8), y + (self.lscr.side / 8) 
+
+    def delete_ants(self):
+        for ant in self.ants:
+            self.lscr.can.delete(ant)
+        self.ants.clear()
     
+    def draw_ants(self):
+        self.delete_ants()
+        for i in range(self.lscr.lmap.antn):
+            r = self.game[self.turn][i]
+            x1, y1, x2, y2 = self.ant_coords(self.lscr.lmap.rooms[r].x,\
+            self.lscr.lmap.rooms[r].y)
+            ant = self.lscr.can.create_oval(x1, y1, x2, y2, fill=ANT_COLOR)
+            self.ants.append(ant)
+        self.lscr.can.pack()
+    
+    def get_steps(self):
+        self.steps.clear()
+        for i in range(self.lscr.lmap.antn):
+            # get the coordinates of the target room
+            xy = self.ant_coords(\
+            self.lscr.lmap.rooms[self.game[self.turn + 1][i]].x,\
+            self.lscr.lmap.rooms[self.game[self.turn + 1][i]].y)
+            # get the coordinates of the current room
+            cur = self.ant_coords(\
+            self.lscr.lmap.rooms[self.game[self.turn][i]].x,\
+            self.lscr.lmap.rooms[self.game[self.turn][i]].y)
+            # get increments
+            ix = (xy[0] - cur[0]) / self.framec
+            iy = (xy[1] - cur[1]) / self.framec
+            self.steps.append([cur[0], cur[1], cur[2], cur[3], ix, iy])
+
+    def draw_step(self):
+        for i in range(self.lscr.lmap.antn):
+            # move ant one frame toward the next node
+            self.lscr.can.coords(self.ants[i],\
+            self.steps[i][0] + (self.steps[i][4] * self.step),\
+            self.steps[i][1] + (self.steps[i][5] * self.step),\
+            self.steps[i][2] + (self.steps[i][4] * self.step),\
+            self.steps[i][3] + (self.steps[i][5] * self.step))
+
+    def fix(self):
+        for i in range(self.lscr.lmap.antn):
+            # fix ant precisely on the node
+            xy = self.ant_coords(\
+            self.lscr.lmap.rooms[self.game[self.turn][i]].x,\
+            self.lscr.lmap.rooms[self.game[self.turn][i]].y)
+            self.lscr.can.coords(self.ants[i], xy[0], xy[1], xy[2], xy[3])
+
+    ## update_screen functions ##
+    def redraw(self):
+        self.lscr.get_side_size()
+        self.lscr.draw_map()
+        self.draw_ants()
+        if self.step > 0:
+            self.get_steps()
+            self.draw_step()
+    
+    def move(self):
+        if self.step > 0:
+            self.get_steps()
+            self.draw_step()
+        else:
+            self.fix()
+
+    def refresh(self):
+        if self.step > 0:
+            self.draw_step()
+        else:
+            self.fix()
+            self.waitc = G_DELAY_DEF
+            self.lscr.update = U_WAIT
+
+    def wait(self):
+        if self.waitc > 0:
+            self.waitc -= 1
+        else:
+            self.lscr.update = U_NONE
+    
+    ## main loop function ##
     def play_game(self):
         self.lscr.async_actions()
         if self.play == True and self.lscr.update != U_WAIT:
