@@ -1,5 +1,4 @@
-- maybe queue the room collisions in compress coordinates to give priority
-  to original coordinates (in the map compressor)
+- make lemin_config file to store values and current lemin conf
 - add a settings menu and a settings file to tweak lemin_tk's behavior
 - the map editor
 - a map generator
