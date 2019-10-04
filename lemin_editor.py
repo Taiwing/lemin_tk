@@ -6,6 +6,7 @@ from lemin_map import *
 # editor constants
 E_GRID_WIDTH_DEF = 160
 E_GRID_HEIGHT_DEF = 90
+CURSOR_COLOR = "DarkOrange3"
 
 class lemin_editor:
     def __init__(self, lmap=None):
@@ -20,7 +21,7 @@ class lemin_editor:
         # cursor data
         self.cur_x = 0
         self.cur_y = 0
-        self.cur = None
+        self.cur = []
 
     def new_map(self):
         lmap = lemin_map()
@@ -34,10 +35,19 @@ class lemin_editor:
         self.lscr.win.bind("<Right>", self.right_handler)
         self.lscr.win.bind("<Up>", self.up_handler)
         self.lscr.win.bind("<Down>", self.down_handler)
+        self.lscr.win.bind("<Home>", self.home_handler)
+        self.lscr.win.bind("<End>", self.end_handler)
+        self.lscr.win.bind("<Prior>", self.prior_handler)
+        self.lscr.win.bind("<Next>", self.next_handler)
+        self.lscr.win.bind("<space>", self.space_handler)
+        self.lscr.win.bind("h", self.h_handler)
+        self.lscr.win.bind("l", self.l_handler)
+        self.lscr.win.bind("k", self.k_handler)
+        self.lscr.win.bind("j", self.j_handler)
         self.lscr.win.bind("s", self.s_handler)
         self.lscr.win.bind("e", self.e_handler)
         self.lscr.win.bind("r", self.r_handler)
-        self.lscr.win.bind("l", self.l_handler)
+        self.lscr.win.bind("c", self.c_handler)
         self.lscr.win.bind("u", self.u_handler)
         self.lscr.win.bind("d", self.d_handler)
 
@@ -53,6 +63,33 @@ class lemin_editor:
     def down_handler(self, event):
         self.lscr.stack.insert(0, self.move_down)
 
+    def home_handler(self, event):
+        self.lscr.stack.insert(0, self.move_all_left)
+
+    def end_handler(self, event):
+        self.lscr.stack.insert(0, self.move_all_right)
+
+    def prior_handler(self, event):
+        self.lscr.stack.insert(0, self.move_all_up)
+
+    def next_handler(self, event):
+        self.lscr.stack.insert(0, self.move_all_down)
+
+    def space_handler(self, event):
+        self.lscr.stack.insert(0, self.move_to_closest_room)
+
+    def h_handler(self, event):
+        self.lscr.stack.insert(0, self.move_to_left_room)
+
+    def l_handler(self, event):
+        self.lscr.stack.insert(0, self.move_to_right_room)
+
+    def k_handler(self, event):
+        self.lscr.stack.insert(0, self.move_to_up_room)
+
+    def j_handler(self, event):
+        self.lscr.stack.insert(0, self.move_to_down_room)
+
     def s_handler(self, event):
         self.lscr.stack.insert(0, self.put_start)
 
@@ -62,11 +99,11 @@ class lemin_editor:
     def r_handler(self, event):
         self.lscr.stack.insert(0, self.put_room)
 
-    def l_handler(self, event):
-        self.lscr.stack.insert(0, self.link)
+    def c_handler(self, event):
+        self.lscr.stack.insert(0, self.connect)
 
     def u_handler(self, event):
-        self.lscr.stack.insert(0, self.unlink)
+        self.lscr.stack.insert(0, self.unconnect)
 
     def d_handler(self, event):
         self.debug()
@@ -91,6 +128,41 @@ class lemin_editor:
             self.cur_y += 1
             self.lscr.update = self.lscr.update_update(U_REFRESH)
 
+    def move_all_left(self):
+        if self.cur_x != 0:
+            self.cur_x = 0
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_all_right(self):
+        if self.cur_x != self.lscr.grid.width - 1:
+            self.cur_x = self.lscr.grid.width - 1
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_all_up(self):
+        if self.cur_y != 0:
+            self.cur_y = 0
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_all_down(self):
+        if self.cur_y != self.lscr.grid.height - 1:
+            self.cur_y = self.lscr.grid.height - 1
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+
+    def move_to_closest_room(self):
+        pass
+
+    def move_to_left_room(self):
+        pass
+
+    def move_to_right_room(self):
+        pass
+
+    def move_to_up_room(self):
+        pass
+
+    def move_to_down_room(self):
+        pass
+
     def put_start(self):
         pass
 
@@ -100,10 +172,10 @@ class lemin_editor:
     def put_room(self):
         pass
 
-    def link(self):
+    def connect(self):
         pass
 
-    def unlink(self):
+    def unconnect(self):
         pass
 
     def debug(self):
@@ -120,24 +192,52 @@ class lemin_editor:
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
 
     ## drawing functions specific to lemin_editor  ##
+    def draw_cursor(self):
+        self.delete_cursor()
+        if self.cur_x >= self.lscr.grid.width\
+        or self.cur_y >= self.lscr.grid.height:
+            self.cur_x = 0
+            self.cur_y = 0
+        #x1, y1, x2, y2 = self.cursor_coords(self.cur_x, self.cur_y)
+        #self.cur = self.lscr.can.create_rectangle(x1, y1, x2, y2, fill="red")
+        self.draw_cursor_lines()
+
+    def delete_cursor(self):
+        for bar in self.cur:
+            self.lscr.can.delete(bar)
+        self.cur.clear()
+
     def cursor_coords(self, g_x, g_y):
         x, y = self.lscr.grid_to_graphical(g_x, g_y)
         return x - (self.lscr.side / 2), y - (self.lscr.side / 2),\
         x + (self.lscr.side / 2), y + (self.lscr.side / 2) 
 
-    def draw_cursor(self):
-        if self.cur != None:
-            self.lscr.can.delete(self.cur)
-        if self.cur_x >= self.lscr.grid.width\
-        or self.cur_y >= self.lscr.grid.height:
-            self.cur_x = 0
-            self.cur_y = 0
+    def draw_cursor_lines(self):
         x1, y1, x2, y2 = self.cursor_coords(self.cur_x, self.cur_y)
-        self.cur = self.lscr.can.create_rectangle(x1, y1, x2, y2, fill="red")
+        x = x1 + 5
+        while x < x2:
+            bar = self.lscr.can.create_line(x, y1, x, y2, fill=CURSOR_COLOR)
+            self.cur.append(bar)
+            x += 5
+        y = y1 + 5
+        while y < y2:
+            bar = self.lscr.can.create_line(x1, y, x2, y, fill=CURSOR_COLOR)
+            self.cur.append(bar)
+            y += 5
 
     def move_cursor(self):
+        i = 0
         x1, y1, x2, y2 = self.cursor_coords(self.cur_x, self.cur_y)
-        self.lscr.can.coords(self.cur, x1, y1, x2, y2)
+        x = x1 + 5
+        while x < x2:
+            self.lscr.can.coords(self.cur[i], x, y1, x, y2)
+            x += 5
+            i += 1
+        y = y1 + 5
+        while y < y2:
+            self.lscr.can.coords(self.cur[i], x1, y, x2, y)
+            y += 5
+            i += 1
 
     ## update_screen functions ##
     def redraw(self):

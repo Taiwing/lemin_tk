@@ -1,7 +1,12 @@
+- the map editor
+  - create a grid to represent the visual grid of the editor (store room names
+  in them, or "None" if they are empty)
+  - add the fallowing commands:
+	- "hlkj": move to left, right, up, down room
+	- "space": move to closest room
+- a map generator
 - make lemin_config file to store values and current lemin conf
 - add a settings menu and a settings file to tweak lemin_tk's behavior
-- the map editor
-- a map generator
 - make it possible to run lemin_tk without providing it a map and to select
   the map and solver from a menu
 - optimize printing
