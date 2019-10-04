@@ -214,15 +214,28 @@ class lemin_editor:
             self.move_down()
 
     def put_start(self):
-        pass
-        #r = self.grid[self.cur_x][self.cur_y]
-        #if r != None and "start" not in self.lscr.lmap.rooms[r].attrs:
-        
+        r = self.grid[self.cur_x][self.cur_y]
+        if r == None:
+            r = self.put_room()
+            self.lscr.update = self.lscr.update_update(U_REDRAW)
+        if r != None and "start" not in self.lscr.lmap.rooms[r].attrs:
+            self.lscr.lmap.commands["start"](self.lscr.lmap, r, "start")
+            self.lscr.update = self.lscr.update_update(U_REDRAW)
 
     def put_end(self):
-        pass
+        r = self.grid[self.cur_x][self.cur_y]
+        if r == None:
+            r = self.put_room()
+            self.lscr.update = self.lscr.update_update(U_REDRAW)
+        if r != None and "end" not in self.lscr.lmap.rooms[r].attrs:
+            self.lscr.lmap.commands["end"](self.lscr.lmap, r, "end")
+            self.lscr.update = self.lscr.update_update(U_REDRAW)
     
     def put_room(self):
+        #TODO: generate a random room name
+        #TODO: add the room to the map and to the grid
+        #TODO: think about the coordinates in case the map is compressed
+        #TODO: remove the "None" test in second condition of put_start once this works
         pass
 
     def connect(self):

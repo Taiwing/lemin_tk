@@ -1,7 +1,11 @@
 - the map editor
+  - add a function to place rooms which will update the original coordinates
+    as well as the compressed ones. This will be needed for puting new rooms
+	on the map as well as moving them around.
   - add the fallowing commands:
   	- "d": delete the room and all its links
 	- "m": move room/place room
+  - allow resizing of the grid (not just compression, but manually modify the size
 - a map generator
 - make lemin_config file to store values and current lemin conf
 - add a settings menu and a settings file to tweak lemin_tk's behavior
