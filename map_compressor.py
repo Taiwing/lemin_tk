@@ -38,6 +38,9 @@ def get_new_grid(lscr, compression, w_comp, h_comp):
             grid_w = int(lscr.grid.orig_w / scale_w)
         if scale_h >= 1:
             grid_h = int(lscr.grid.orig_h / scale_h)
+        if grid_w * grid_h < lscr.roomn:
+            grid_w = lscr.grid.width_min
+            grid_y = lscr.grid.height_min
         lscr.grid.w_comp = w_comp
         lscr.grid.h_comp = h_comp
     return grid_w, grid_h
@@ -62,4 +65,4 @@ def move_room(lscr, s_x, s_y, grid, dist):
                 return x, y
             x = x + 1 if on_y or x == end_x else end_x
         y += 1
-    return move_room(lscr, x, y, grid, dist + 1)
+    return move_room(lscr, s_x, s_y, grid, dist + 1)
