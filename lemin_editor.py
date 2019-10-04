@@ -84,7 +84,6 @@ class lemin_editor:
         self.lscr.win.bind("e", self.e_handler)
         self.lscr.win.bind("r", self.r_handler)
         self.lscr.win.bind("c", self.c_handler)
-        self.lscr.win.bind("u", self.u_handler)
         self.lscr.win.bind("d", self.d_handler)
 
     def left_handler(self, event):
@@ -134,9 +133,6 @@ class lemin_editor:
 
     def c_handler(self, event):
         self.lscr.stack.insert(0, self.connect)
-
-    def u_handler(self, event):
-        self.lscr.stack.insert(0, self.unconnect)
 
     def d_handler(self, event):
         self.debug()
@@ -219,6 +215,9 @@ class lemin_editor:
 
     def put_start(self):
         pass
+        #r = self.grid[self.cur_x][self.cur_y]
+        #if r != None and "start" not in self.lscr.lmap.rooms[r].attrs:
+        
 
     def put_end(self):
         pass
@@ -227,9 +226,6 @@ class lemin_editor:
         pass
 
     def connect(self):
-        pass
-
-    def unconnect(self):
         pass
 
     def debug(self):
@@ -252,8 +248,6 @@ class lemin_editor:
         or self.cur_y >= self.lscr.grid.height:
             self.cur_x = 0
             self.cur_y = 0
-        #x1, y1, x2, y2 = self.cursor_coords(self.cur_x, self.cur_y)
-        #self.cur = self.lscr.can.create_rectangle(x1, y1, x2, y2, fill="red")
         self.draw_cursor_lines()
 
     def delete_cursor(self):

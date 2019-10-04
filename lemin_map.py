@@ -6,6 +6,7 @@ def map_eprint(err):
     eprint("error: " + err)
 
 class lemin_map:
+
     def __init__(self):
         self.antn = 0
         self.size = 0 # number of rooms
@@ -40,20 +41,25 @@ class lemin_map:
             p.miny = r[2]
         if p.maxy == None or r[2] > p.maxy:
             p.maxy = r[2]
-        for com in commands:
-            # right now, this is ugly, do a function pointer dictionnary
-            if com == "start":
-                self.start = r[0]
-                self.end = "" if self.end == self.start else self.end
-                self.rooms[r[0]].attrs.append(com)
-            elif com == "end":
-                self.end = r[0]
-                self.start = "" if self.start == self.end else self.start
-                self.rooms[r[0]].attrs.append(com)
-            elif com == "":
+        for c in commands:
+            if c in self.commands:
+                self.commands[c](self, r[0], c)
+            elif c == "":
                 map_eprint("empty command")
             else:
-                map_eprint("\"" + com + "\" unknown command")
+                map_eprint("\"" + c + "\" unknown command")
+
+    def cmd_start(self, r, command):
+        self.start = r
+        self.end = "" if self.end == self.start else self.end
+        if command not in self.rooms[r].attrs:
+            self.rooms[r].attrs.append(command)
+    
+    def cmd_end(self, r, command):
+        self.end = r
+        self.start = "" if self.start == self.end else self.start
+        if command not in self.rooms[r].attrs:
+            self.rooms[r].attrs.append(command)
 
     def add_link(self, lnk, commands):
         commands.clear() #until link commands are a reality
@@ -81,6 +87,11 @@ class lemin_map:
         for link in self.links:
             ret += link + "\n"
         return ret
+    
+    commands = {
+        "start": cmd_start,
+        "end": cmd_end,
+    }
 
 class room:
     def __init__(self):
