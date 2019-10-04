@@ -42,41 +42,24 @@ def get_new_grid(lscr, compression, w_comp, h_comp):
         lscr.grid.h_comp = h_comp
     return grid_w, grid_h
 
-def move_room(lscr, x, y, grid, dist):
-    start_y = y - dist
-    start_x = x - dist
-    end_y = y + dist
-    end_x = x + dist
+def move_room(lscr, s_x, s_y, grid, dist):
+    start_x = s_x - dist
+    start_y = s_y - dist
+    end_x = s_x + dist
+    end_y = s_y + dist
     if start_y < 0 and start_x < 0\
-    and end_y > lscr.grid.height - 1 and end_x > lscr.grid.width - 1:
+    and end_x > lscr.grid.width - 1\
+    and end_y > lscr.grid.height - 1:
         eprint("error: no place found in grid")
         exit()
-    ty = start_y 
-    tx = max(0, start_x)
-    if ty >= 0:
-        while tx < end_x + 1 and tx < lscr.grid.width:
-            if grid[tx][ty] == 0:
-                return tx, ty
-            tx += 1
-    ty = max(0, start_y)
-    tx = end_x
-    if tx < lscr.grid.width:
-        while ty < end_y + 1 and ty < lscr.grid.height:
-            if grid[tx][ty] == 0:
-                return tx, ty
-            ty += 1
-    ty = end_y
-    tx = min(lscr.grid.width - 1, end_x)
-    if ty < lscr.grid.height:
-        while tx >= start_x and tx >= 0:
-            if grid[tx][ty] == 0:
-                return tx, ty
-            tx -= 1
-    ty = min(lscr.grid.height - 1, end_y)
-    tx = start_x
-    if tx >= 0:
-        while ty >= start_y and ty >= 0:
-            if grid[tx][ty] == 0:
-                return tx, ty
-            ty -= 1
+    y = max(start_y, 0)
+    while y < lscr.grid.height and y < end_y + 1:
+        x = max(start_x, 0)
+        while x < lscr.grid.width and x < end_x + 1:
+            on_y = y == start_y or y == end_y
+            on_x = x == start_x or x == end_x
+            if (on_y or on_x) and grid[x][y] == 0:
+                return x, y
+            x = x + 1 if on_y or x == end_x else end_x
+        y += 1
     return move_room(lscr, x, y, grid, dist + 1)

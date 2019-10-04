@@ -6,7 +6,6 @@ def map_eprint(err):
     eprint("error: " + err)
 
 class lemin_map:
-
     def __init__(self):
         self.antn = 0
         self.size = 0 # number of rooms

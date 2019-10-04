@@ -41,9 +41,11 @@ def square_grid(turn, grid, s_x, s_y, width, height):
     while y < height and y < end_y + 1:
         x = max(start_x, 0)
         while x < width and x < end_x + 1:
-            if y == start_y or y == end_y or x == start_x or x == end_x:
+            on_y = y == start_y or y == end_y
+            on_x = x == start_x or x == end_x
+            if on_y or on_x:
                 grid[x][y] = color + str(dist % 10) + C_RESET
-            x += 1
+            x = x + 1 if on_y or x == end_x else end_x
         y += 1
     return turn + 1
 
@@ -55,4 +57,4 @@ while turn:
     clear()
     print_grid(grid)
     turn = square_grid(turn, grid, x, y, width, height)
-    sleep(0.5)
+    sleep(0.125)
