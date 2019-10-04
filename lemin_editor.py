@@ -39,7 +39,7 @@ class lemin_editor:
         for r in rooms:
             self.grid[rooms[r].x][rooms[r].y] = r
 
-    def find_room(self, direction=None):
+    def find_room(self, direction):
         if direction == "left":
             x = self.cur_x - 1
             while x > -1:
@@ -64,8 +64,6 @@ class lemin_editor:
                 if self.grid[self.cur_x][y] != None:
                     return self.cur_x, y
                 y += 1
-#        elif direction == None:
-#            return self.find_nearest_room()
         return -1, -1
 
     ## event handling of lemin_editor ##
@@ -78,7 +76,6 @@ class lemin_editor:
         self.lscr.win.bind("<End>", self.end_handler)
         self.lscr.win.bind("<Prior>", self.prior_handler)
         self.lscr.win.bind("<Next>", self.next_handler)
-        self.lscr.win.bind("<space>", self.space_handler)
         self.lscr.win.bind("h", self.h_handler)
         self.lscr.win.bind("l", self.l_handler)
         self.lscr.win.bind("k", self.k_handler)
@@ -113,9 +110,6 @@ class lemin_editor:
 
     def next_handler(self, event):
         self.lscr.stack.insert(0, self.move_all_down)
-
-    def space_handler(self, event):
-        self.lscr.stack.insert(0, self.move_to_closest_room)
 
     def h_handler(self, event):
         self.lscr.stack.insert(0, self.move_to_left_room)
@@ -185,13 +179,6 @@ class lemin_editor:
     def move_all_down(self):
         if self.cur_y != self.lscr.grid.height - 1:
             self.cur_y = self.lscr.grid.height - 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
-
-    def move_to_closest_room(self):
-        x, y = self.find_room()
-        if x != -1 and y != 1:
-            self.cur_x = x
-            self.cur_y = y
             self.lscr.update = self.lscr.update_update(U_REFRESH)
 
     def move_to_left_room(self):
