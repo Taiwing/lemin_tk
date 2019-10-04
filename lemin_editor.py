@@ -17,17 +17,56 @@ class lemin_editor:
         self.move, self.refresh, self.wait)
         self.lscr.init_canvas(self.init_editor_actions)
         self.lscr.win.after(0, self.edit_map)
-        # edit data
         # cursor data
         self.cur_x = 0
         self.cur_y = 0
         self.cur = []
+        # visual grid
+        self.grid = []
+        self.init_visual_grid(self.lscr.lmap.rooms)
 
     def new_map(self):
         lmap = lemin_map()
         lmap.orig_w = E_GRID_WIDTH_DEF
         lmap.orig_h = E_GRID_HEIGHT_DEF
         return lmap
+
+    ## visual grid funcions ##
+    def init_visual_grid(self, rooms):
+        self.grid.clear()
+        self.grid = [[None for j in range(self.lscr.grid.height)]\
+                for i in range(self.lscr.grid.width)]
+        for r in rooms:
+            self.grid[rooms[r].x][rooms[r].y] = r
+
+    def find_room(self, direction=None):
+        if direction == "left":
+            x = self.cur_x - 1
+            while x > -1:
+                if self.grid[x][self.cur_y] != None:
+                    return x, self.cur_y
+                x -= 1
+        elif direction == "right":
+            x = self.cur_x + 1
+            while x < self.lscr.grid.width:
+                if self.grid[x][self.cur_y] != None:
+                    return x, self.cur_y
+                x += 1
+        elif direction == "up":
+            y = self.cur_y - 1
+            while y > -1:
+                if self.grid[self.cur_x][y] != None:
+                    return self.cur_x, y
+                y -= 1
+        elif direction == "down":
+            y = self.cur_y + 1
+            while y < self.lscr.grid.height:
+                if self.grid[self.cur_x][y] != None:
+                    return self.cur_x, y
+                y += 1
+#        elif direction == None:
+#            return self.find_nearest_room()
+        return -1, -1
 
     ## event handling of lemin_editor ##
     def init_editor_actions(self):
@@ -149,19 +188,47 @@ class lemin_editor:
             self.lscr.update = self.lscr.update_update(U_REFRESH)
 
     def move_to_closest_room(self):
-        pass
+        x, y = self.find_room()
+        if x != -1 and y != 1:
+            self.cur_x = x
+            self.cur_y = y
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
 
     def move_to_left_room(self):
-        pass
+        x, y = self.find_room("left")
+        if x != -1 and y != 1:
+            self.cur_x = x
+            self.cur_y = y
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+        else:
+            self.move_left()
 
     def move_to_right_room(self):
-        pass
+        x, y = self.find_room("right")
+        if x != -1 and y != 1:
+            self.cur_x = x
+            self.cur_y = y
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+        else:
+            self.move_right()
 
     def move_to_up_room(self):
-        pass
+        x, y = self.find_room("up")
+        if x != -1 and y != 1:
+            self.cur_x = x
+            self.cur_y = y
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+        else:
+            self.move_up()
 
     def move_to_down_room(self):
-        pass
+        x, y = self.find_room("down")
+        if x != -1 and y != 1:
+            self.cur_x = x
+            self.cur_y = y
+            self.lscr.update = self.lscr.update_update(U_REFRESH)
+        else:
+            self.move_down()
 
     def put_start(self):
         pass
@@ -244,6 +311,7 @@ class lemin_editor:
         self.lscr.get_side_size()
         self.lscr.draw_map()
         self.draw_cursor()
+        self.init_visual_grid(self.lscr.lmap.rooms)
     
     def move(self):
         pass
