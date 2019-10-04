@@ -17,8 +17,10 @@ class lemin_editor:
         self.lscr.init_canvas(self.init_editor_actions)
         self.lscr.win.after(0, self.edit_map)
         # edit data
+        # cursor data
         self.cur_x = 0
         self.cur_y = 0
+        self.cur = None
 
     def new_map(self):
         lmap = lemin_map()
@@ -117,21 +119,37 @@ class lemin_editor:
         print("self.lscr.grid.w_comp =", self.lscr.grid.w_comp)
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
 
-#    ## drawing functions specific to lemin_editor  ##
-#    def draw_cursor(self):
+    ## drawing functions specific to lemin_editor  ##
+    def cursor_coords(self, g_x, g_y):
+        x, y = self.lscr.grid_to_graphical(g_x, g_y)
+        return x - (self.lscr.side / 2), y - (self.lscr.side / 2),\
+        x + (self.lscr.side / 2), y + (self.lscr.side / 2) 
 
+    def draw_cursor(self):
+        if self.cur != None:
+            self.lscr.can.delete(self.cur)
+        if self.cur_x >= self.lscr.grid.width\
+        or self.cur_y >= self.lscr.grid.height:
+            self.cur_x = 0
+            self.cur_y = 0
+        x1, y1, x2, y2 = self.cursor_coords(self.cur_x, self.cur_y)
+        self.cur = self.lscr.can.create_rectangle(x1, y1, x2, y2, fill="red")
 
+    def move_cursor(self):
+        x1, y1, x2, y2 = self.cursor_coords(self.cur_x, self.cur_y)
+        self.lscr.can.coords(self.cur, x1, y1, x2, y2)
 
     ## update_screen functions ##
     def redraw(self):
         self.lscr.get_side_size()
         self.lscr.draw_map()
+        self.draw_cursor()
     
     def move(self):
         pass
 
     def refresh(self):
-        pass
+        self.move_cursor() # TODO: maybe move to move (lol) and use refresh for something else
 
     def wait(self):
         pass
