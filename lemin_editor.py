@@ -87,6 +87,7 @@ class lemin_editor:
         self.lscr.win.bind("r", self.r_handler)
         self.lscr.win.bind("c", self.c_handler)
         self.lscr.win.bind("d", self.d_handler)
+        self.lscr.win.bind("p", self.p_handler)
 
     def left_handler(self, event):
         self.lscr.stack.insert(0, self.move_left)
@@ -139,6 +140,9 @@ class lemin_editor:
     def d_handler(self, event):
         self.lscr.stack.insert(0, self.delete_room)
 
+    def p_handler(self, event):
+        self.debug()
+
     def move_left(self):
         if self.cur_x > 0:
             self.cur_x -= 1
@@ -181,7 +185,7 @@ class lemin_editor:
 
     def move_to_left_room(self):
         x, y = self.find_room("left")
-        if x != -1 and y != 1:
+        if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
             self.lscr.update = self.lscr.update_update(U_REFRESH)
@@ -190,7 +194,7 @@ class lemin_editor:
 
     def move_to_right_room(self):
         x, y = self.find_room("right")
-        if x != -1 and y != 1:
+        if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
             self.lscr.update = self.lscr.update_update(U_REFRESH)
@@ -199,7 +203,7 @@ class lemin_editor:
 
     def move_to_up_room(self):
         x, y = self.find_room("up")
-        if x != -1 and y != 1:
+        if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
             self.lscr.update = self.lscr.update_update(U_REFRESH)
@@ -208,7 +212,7 @@ class lemin_editor:
 
     def move_to_down_room(self):
         x, y = self.find_room("down")
-        if x != -1 and y != 1:
+        if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
             self.lscr.update = self.lscr.update_update(U_REFRESH)
@@ -237,7 +241,7 @@ class lemin_editor:
         if self.lscr.grid.orig_w * self.lscr.grid.orig_h <\
                 self.lscr.roomn + len(self.lscr.lmap.unused_rooms) + 1:
             return None # TODO: resize the original grid in this case
-        name = self.lscr.lmap.generate_room_name(16)
+        name = self.lscr.lmap.generate_room_name(5)
         self.grid[self.cur_x][self.cur_y] = name
         self.lscr.lmap.rooms[name] = room()
         self.lscr.lmap.rooms[name].x = self.cur_x
@@ -248,6 +252,8 @@ class lemin_editor:
         self.cur_y, self.lscr.lmap)
         self.lscr.grid.get_min(self.lscr.screen_width,\
                 self.lscr.screen_height, self.lscr.roomn)
+        if self.lnk != None:
+            self.connect()
         self.lscr.update = self.lscr.update_update(U_REDRAW)
         return name
 
@@ -271,9 +277,45 @@ class lemin_editor:
         self.lscr.update = self.lscr.update_update(U_REDRAW)
 
     def delete_room(self):
-        pass
+        r = self.grid[self.cur_x][self.cur_y]
+        if r == None:
+            return
+        for l in self.lscr.lmap.rooms[r].links:
+            self.lscr.lmap.rooms[l].links.remove(r)
+            name = link_name(r, l)
+            self.lscr.can.delete(self.lscr.lmap.links.pop(name).shape)
+        if r == self.lscr.lmap.start:
+            self.lscr.lmap.start = ""
+        if r == self.lscr.lmap.end:
+            self.lscr.lmap.end = ""
+        self.lscr.can.delete(self.lscr.lmap.rooms.pop(r).shape)
+        self.lscr.lmap.size -= 1
+        self.lscr.roomn = len(self.lscr.lmap.rooms)
+        self.lscr.grid.get_min(self.lscr.screen_width,\
+                self.lscr.screen_height, self.lscr.roomn)
+        self.grid[self.cur_x][self.cur_y] = None
+        self.lscr.update = self.lscr.update_update(U_REDRAW)
 
-    ## drawing functions specific to lemin_editor  ##
+    def debug(self):
+        print()
+        limit_line = "\u001B[31m"
+        for i in range(self.lscr.grid.width + 2):
+            limit_line += "#"
+        limit_line += "\u001B[0m"
+        print(limit_line)
+        for j in range(self.lscr.grid.height):
+            line = "\u001B[31m#\u001B[0m"
+            for i in range(self.lscr.grid.width):
+                if self.grid[i][j] == None:
+                    line += " "
+             #       line += "     "
+                else:
+                    line += "#"
+             #       line += self.grid[i][j][0:4] + "  "
+            print(line + "\u001B[31m#\u001B[0m")
+        print(limit_line)
+
+    ## drawing functions specific to lemin_editor ##
     def draw_cursor(self):
         self.delete_cursor()
         if self.cur_x >= self.lscr.grid.width\
