@@ -2,6 +2,7 @@
 
 from lemin_screen import *
 from lemin_map import *
+from tkinter import filedialog
 
 # editor constants
 E_GRID_WIDTH_DEF = 160
@@ -27,6 +28,8 @@ class lemin_editor:
         # actions
         self.lnk = None # connect or disconnect two rooms
         self.move = None # move a room
+        # output
+        self.file = None
 
     def new_map(self):
         lmap = lemin_map()
@@ -335,20 +338,20 @@ class lemin_editor:
         for j in range(self.lscr.grid.height):
             line = "\u001B[31m#\u001B[0m"
             for i in range(self.lscr.grid.width):
-                if self.grid[i][j] == None:
-                    line += " "
-             #       line += "     "
-                else:
-                    line += "#"
-             #       line += self.grid[i][j][0:4] + "  "
+                line += " " if self.grid[i][j] == None else "#"
             print(line + "\u001B[31m#\u001B[0m")
         print(limit_line)
 
     def save_map(self):
-        print("save_map")
+        if self.file == None:
+            self.save_map_as()
+        else:
+            self.lscr.lmap.write_to_file(self.file)
     
     def save_map_as(self):
-        print("save_map_as")
+        self.file = filedialog.asksaveasfilename(initialdir = "~", title = "Save map")
+        if self.file != None:
+            self.lscr.lmap.write_to_file(self.file)
 
     ## drawing functions specific to lemin_editor ##
     def draw_cursor(self):

@@ -92,6 +92,19 @@ class lemin_map:
             exit()
         return name
 
+    def write_to_file(self, name):
+        map_txt = str(self.antn) + "\n"
+        for r in self.rooms:
+            for a in self.rooms[r].attrs:
+                map_txt += "##" + a + "\n"
+            map_txt += r + " " + str(self.rooms[r].x) + " "\
+                    + str(self.rooms[r].y) + "\n"
+        for l in self.links:
+            map_txt += l + "\n"
+        f = open(name, 'w')
+        f.write(map_txt)
+        f.close()
+
     def mprint(self):
         ret = "antn = " + str(self.antn) + "\n"\
         + "size = " + str(self.size) + "\n"\
