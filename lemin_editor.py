@@ -90,6 +90,10 @@ class lemin_editor:
         self.lscr.win.bind("d", self.d_handler)
         self.lscr.win.bind("m", self.m_handler)
         self.lscr.win.bind("p", self.p_handler)
+        self.lscr.win.bind("<Control-s>", self.control_s_handler)
+        self.lscr.win.bind("<Command-s>", self.control_s_handler)
+        self.lscr.win.bind("<Control-S>", self.control_shift_s_handler)
+        self.lscr.win.bind("<Command-S>", self.control_shift_s_handler)
 
     def left_handler(self, event):
         self.lscr.stack.insert(0, self.move_left)
@@ -147,6 +151,12 @@ class lemin_editor:
 
     def p_handler(self, event):
         self.debug()
+        
+    def control_s_handler(self, event):
+        self.lscr.stack.insert(0, self.save_map)
+
+    def control_shift_s_handler(self, event):
+        self.lscr.stack.insert(0, self.save_map_as)
 
     def move_left(self):
         if self.cur_x > 0:
@@ -333,6 +343,12 @@ class lemin_editor:
              #       line += self.grid[i][j][0:4] + "  "
             print(line + "\u001B[31m#\u001B[0m")
         print(limit_line)
+
+    def save_map(self):
+        print("save_map")
+    
+    def save_map_as(self):
+        print("save_map_as")
 
     ## drawing functions specific to lemin_editor ##
     def draw_cursor(self):
