@@ -350,7 +350,7 @@ class lemin_editor:
     
     def save_map_as(self):
         self.file = filedialog.asksaveasfilename(initialdir = "~", title = "Save map")
-        if self.file != None:
+        if self.file != None and len(self.file) > 0:
             self.lscr.lmap.write_to_file(self.file)
 
     ## drawing functions specific to lemin_editor ##
