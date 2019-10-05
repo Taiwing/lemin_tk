@@ -24,6 +24,8 @@ class lemin_editor:
         # visual grid
         self.grid = []
         self.init_visual_grid(self.lscr.lmap.rooms)
+        # link rooms
+        self.lnk = None
 
     def new_map(self):
         lmap = lemin_map()
@@ -250,7 +252,23 @@ class lemin_editor:
         return name
 
     def connect(self):
-        pass
+        r = self.grid[self.cur_x][self.cur_y]
+        if r == None:
+            return
+        elif self.lnk == None or self.lnk not in self.lscr.lmap.rooms:
+            self.lnk = r
+            return
+        name = link_name(r, self.lnk)
+        if name in self.lscr.lmap.links:
+            self.lscr.can.delete(self.lscr.lmap.links.pop(name).shape)
+            self.lscr.lmap.rooms[r].links.remove(self.lnk)
+            self.lscr.lmap.rooms[self.lnk].links.remove(r)
+        else:
+            self.lscr.lmap.links[name] = link()
+            self.lscr.lmap.rooms[r].links.append(self.lnk)
+            self.lscr.lmap.rooms[self.lnk].links.append(r)
+        self.lnk = None
+        self.lscr.update = self.lscr.update_update(U_REDRAW)
 
     def delete_room(self):
         pass
