@@ -1,7 +1,4 @@
 - the map editor
-  - add the fallowing commands:
-  	- "d": delete the room and all its links
-	- "m": move room/place room
   - allow resizing of the grid (not just compression, but manually modify the size
 - a map generator
 - make lemin_config file to store values and current lemin conf

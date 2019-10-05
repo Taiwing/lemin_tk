@@ -24,8 +24,9 @@ class lemin_editor:
         # visual grid
         self.grid = []
         self.init_visual_grid(self.lscr.lmap.rooms)
-        # link rooms
-        self.lnk = None
+        # actions
+        self.lnk = None # connect or disconnect two rooms
+        self.move = None # move a room
 
     def new_map(self):
         lmap = lemin_map()
@@ -87,6 +88,7 @@ class lemin_editor:
         self.lscr.win.bind("r", self.r_handler)
         self.lscr.win.bind("c", self.c_handler)
         self.lscr.win.bind("d", self.d_handler)
+        self.lscr.win.bind("m", self.m_handler)
         self.lscr.win.bind("p", self.p_handler)
 
     def left_handler(self, event):
@@ -139,6 +141,9 @@ class lemin_editor:
 
     def d_handler(self, event):
         self.lscr.stack.insert(0, self.delete_room)
+
+    def m_handler(self, event):
+        self.lscr.stack.insert(0, self.move_room)
 
     def p_handler(self, event):
         self.debug()
@@ -295,6 +300,20 @@ class lemin_editor:
                 self.lscr.screen_height, self.lscr.roomn)
         self.grid[self.cur_x][self.cur_y] = None
         self.lscr.update = self.lscr.update_update(U_REDRAW)
+
+    def move_room(self):
+        r = self.grid[self.cur_x][self.cur_y]
+        if r == None:
+            if self.move != None:
+                self.grid[self.cur_x][self.cur_y] = self.move
+                self.lscr.lmap.rooms[self.move].x = self.cur_x
+                self.lscr.lmap.rooms[self.move].y = self.cur_y
+                self.lscr.grid.place_on_orig_grid(self.move, self.cur_x,\
+                self.cur_y, self.lscr.lmap)
+                self.move = None
+                self.lscr.update = self.lscr.update_update(U_REDRAW)
+        elif self.move == None:
+            self.move = r
 
     def debug(self):
         print()
