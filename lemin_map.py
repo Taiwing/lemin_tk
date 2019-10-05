@@ -49,16 +49,24 @@ class lemin_map:
                 map_eprint("\"" + c + "\" unknown command")
 
     def cmd_start(self, r, command):
+        if self.start and self.start != r:
+            self.rooms[self.start].attrs.remove(command)
         self.start = r
         self.end = "" if self.end == self.start else self.end
         if command not in self.rooms[r].attrs:
             self.rooms[r].attrs.append(command)
+        if "end" in self.rooms[r].attrs:
+            self.rooms[r].attrs.remove("end")
     
     def cmd_end(self, r, command):
+        if self.end and self.end != r:
+            self.rooms[self.end].attrs.remove(command)
         self.end = r
         self.start = "" if self.start == self.end else self.start
         if command not in self.rooms[r].attrs:
             self.rooms[r].attrs.append(command)
+        if "start" in self.rooms[r].attrs:
+            self.rooms[r].attrs.remove("start")
 
     def add_link(self, lnk, commands):
         commands.clear() #until link commands are a reality
