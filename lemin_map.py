@@ -48,6 +48,19 @@ class lemin_map:
             else:
                 map_eprint("\"" + c + "\" unknown command")
 
+    def add_link(self, lnk, commands):
+        commands.clear() #until link commands are a reality
+        name = link_name(lnk[0], lnk[1])
+        if lnk[0] not in self.rooms or lnk[1] not in self.rooms:
+            map_eprint("\"" + lnk[0] + "-" + lnk[1] + "\" is invalid") 
+            exit()
+        elif name in self.links:
+            map_eprint("\"" + lnk[0] + "-" + lnk[1] + "\" already exists") 
+        else:
+            self.links[name] = link()
+            self.rooms[lnk[0]].links.append(lnk[1])
+            self.rooms[lnk[1]].links.append(lnk[0])
+    
     def cmd_start(self, r, command):
         if self.start and self.start != r:
             self.rooms[self.start].attrs.remove(command)
@@ -68,18 +81,16 @@ class lemin_map:
         if "start" in self.rooms[r].attrs:
             self.rooms[r].attrs.remove("start")
 
-    def add_link(self, lnk, commands):
-        commands.clear() #until link commands are a reality
-        name = link_name(lnk[0], lnk[1])
-        if lnk[0] not in self.rooms or lnk[1] not in self.rooms:
-            map_eprint("\"" + lnk[0] + "-" + lnk[1] + "\" is invalid") 
+    def generate_room_name(self, size):
+        i = 0
+        name = randstr(size)
+        while name in self.rooms and i < 100:
+            name = randstr(size)
+            i += 1
+        if i == 100:
+            map_eprint("couldn't generate a random name")
             exit()
-        elif name in self.links:
-            map_eprint("\"" + lnk[0] + "-" + lnk[1] + "\" already exists") 
-        else:
-            self.links[name] = link()
-            self.rooms[lnk[0]].links.append(lnk[1])
-            self.rooms[lnk[1]].links.append(lnk[0])
+        return name
 
     def mprint(self):
         ret = "antn = " + str(self.antn) + "\n"\

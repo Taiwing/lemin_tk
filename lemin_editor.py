@@ -135,7 +135,7 @@ class lemin_editor:
         self.lscr.stack.insert(0, self.connect)
 
     def d_handler(self, event):
-        self.debug()
+        self.lscr.stack.insert(0, self.delete_room)
 
     def move_left(self):
         if self.cur_x > 0:
@@ -217,7 +217,6 @@ class lemin_editor:
         r = self.grid[self.cur_x][self.cur_y]
         if r == None:
             r = self.put_room()
-            self.lscr.update = self.lscr.update_update(U_REDRAW)
         if r != None and "start" not in self.lscr.lmap.rooms[r].attrs:
             self.lscr.lmap.commands["start"](self.lscr.lmap, r, "start")
             self.lscr.update = self.lscr.update_update(U_REDRAW)
@@ -226,33 +225,35 @@ class lemin_editor:
         r = self.grid[self.cur_x][self.cur_y]
         if r == None:
             r = self.put_room()
-            self.lscr.update = self.lscr.update_update(U_REDRAW)
         if r != None and "end" not in self.lscr.lmap.rooms[r].attrs:
             self.lscr.lmap.commands["end"](self.lscr.lmap, r, "end")
             self.lscr.update = self.lscr.update_update(U_REDRAW)
     
     def put_room(self):
-        #TODO: generate a random room name
-        #TODO: add the room to the map and to the grid
-        #TODO: think about the coordinates in case the map is compressed
-        #TODO: remove the "None" test in second condition of put_start once this works
-        pass
+        if self.grid[self.cur_x][self.cur_y] != None:
+            return None
+        if self.lscr.grid.orig_w * self.lscr.grid.orig_h <\
+                self.lscr.roomn + len(self.lscr.lmap.unused_rooms) + 1:
+            return None # TODO: resize the original grid in this case
+        name = self.lscr.lmap.generate_room_name(16)
+        self.grid[self.cur_x][self.cur_y] = name
+        self.lscr.lmap.rooms[name] = room()
+        self.lscr.lmap.rooms[name].x = self.cur_x
+        self.lscr.lmap.rooms[name].y = self.cur_y
+        self.lscr.roomn = len(self.lscr.lmap.rooms)
+        self.lscr.lmap.size += 1
+        self.lscr.grid.place_on_orig_grid(name, self.cur_x,\
+        self.cur_y, self.lscr.lmap)
+        self.lscr.grid.get_min(self.lscr.screen_width,\
+                self.lscr.screen_height, self.lscr.roomn)
+        self.lscr.update = self.lscr.update_update(U_REDRAW)
+        return name
 
     def connect(self):
         pass
 
-    def debug(self):
-        print("self.lscr.update:",\
-        "U_NONE" if self.lscr.update == U_NONE else\
-        "U_WAIT" if self.lscr.update == U_WAIT else\
-        "U_REFRESH" if self.lscr.update == U_REFRESH else\
-        "U_MOVE" if self.lscr.update == U_MOVE else\
-        "U_REDRAW" if self.lscr.update == U_REDRAW else\
-        "ERROR")
-        print("len(self.lscr.stack)", len(self.lscr.stack))
-        print("self.lscr.stack:", self.lscr.stack)
-        print("self.lscr.grid.w_comp =", self.lscr.grid.w_comp)
-        print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
+    def delete_room(self):
+        pass
 
     ## drawing functions specific to lemin_editor  ##
     def draw_cursor(self):
