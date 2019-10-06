@@ -1,3 +1,5 @@
+- switch between map editor and player (press 'e' for editor in player and 'p'
+  for play in editor [a player will have to be loaded])
 - the map editor
   - allow resizing of the grid (not just compression, but manually modify the size
 - a map generator
