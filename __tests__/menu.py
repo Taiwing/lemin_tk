@@ -21,7 +21,11 @@ class lemin_menu:
         self.frame = Frame(self.win, bg=BACKGROUND_COLOR)
         self.frame.pack(fill="both", expand=True)
         # label
-        
+        self.logo = Label(self.frame, text="LEMIN_TK",\
+            font=("Helvetica", 48, "italic"),\
+            fg="blue4", bg=BACKGROUND_COLOR,\
+            padx=20, pady=20)
+        self.logo.pack()
         # comboboxes
         self.combostyle = ttk.Style()
         self.combostyle.theme_create("combostyle", parent="alt",\
@@ -42,17 +46,20 @@ class lemin_menu:
             values=self.solvers, state="readonly")
         # buttons
         self.add_map_button = Button(self.frame, text="add map",\
-            command=self.add_map, highlightbackground=BACKGROUND_COLOR)
+            command=self.add_map, highlightbackground=BACKGROUND_COLOR,\
+            padx=10, pady=10)
         self.add_map_button.pack()
         self.edit_map_button = Button(self.frame, text="edit map",\
             command=self.edit_map, highlightbackground=BACKGROUND_COLOR)
         self.edit_map_button.pack()
         self.generate_map_button = Button(self.frame, text="generate map",\
-            command=self.generate_map, highlightbackground=BACKGROUND_COLOR)
+            command=self.generate_map, highlightbackground=BACKGROUND_COLOR,\
+            padx=10, pady=10)
         self.generate_map_button.pack()
         self.select_solver.pack()
         self.add_solver_button = Button(self.frame, text="add solver",\
-            command=self.add_solver, highlightbackground=BACKGROUND_COLOR)
+            command=self.add_solver, highlightbackground=BACKGROUND_COLOR,\
+            padx=10, pady=10)
         self.add_solver_button.pack()
         self.play_button = Button(self.frame, text="play",\
             command=self.play, highlightbackground=BACKGROUND_COLOR)
