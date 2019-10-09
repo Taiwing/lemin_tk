@@ -42,9 +42,11 @@ class lemin_menu:
         self.combostyle.theme_use("combostyle")
         self.maps = {}
         self.select_map = ttk.Combobox(self.frame, state="readonly")
+        self.select_map.set("          -- select map --")
         self.select_map.pack()
         self.solvers = {}
         self.select_solver = ttk.Combobox(self.frame, state="readonly")
+        self.select_solver.set("        -- select solver --")
         # buttons
         self.add_map_button = Button(self.frame, text="add map",\
             command=self.add_map, highlightbackground=BACKGROUND_COLOR,\
