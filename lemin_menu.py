@@ -102,7 +102,7 @@ class lemin_menu:
 
     def edit_map(self):
         map_name = self.select_map.get()
-        if map_name == None or len(map_name) == 0:
+        if map_name == None or len(map_name) == 0 or len(self.maps) == 0:
             eprint("error: no map selected")
             return
         map_file = open(self.maps[map_name])
@@ -114,7 +114,7 @@ class lemin_menu:
         edit_lemin_map(lmap)
 
     def generate_map(self):
-        print("generate \"" + self.select_map.get() + "\"")
+        print("generate map") 
 
     def add_solver(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
@@ -139,7 +139,8 @@ class lemin_menu:
     def play(self):
         map_name = self.select_map.get()
         solver_name = self.select_solver.get()
-        if len(map_name) == 0 or len(solver_name) == 0:
+        if len(map_name) == 0 or len(solver_name) == 0\
+                or len(self.maps) == 0 or len(self.solvers) == 0:
             eprint("error: no map or solver")
             return
         map_file = self.maps[map_name]
@@ -147,10 +148,6 @@ class lemin_menu:
         proc = subprocess.run(solver_file + ' < ' + map_file,\
                 stdout=subprocess.PIPE, shell=True)
         output = proc.stdout.decode("utf-8").splitlines(keepends=True)
-        i = 0
-        for line in output:
-            i += 1
-            print("line " + str(i) + ": " + line)
         lmap, lc = lemin_map_parser(output)
         if lmap == None or lemin_map_checker(lmap):
             eprint("error: invalid map")
