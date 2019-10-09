@@ -156,5 +156,4 @@ class lemin_menu:
         if game == None or lemin_game_checker(game, lmap):
             eprint("error: invalid solution")
             return
-        print(game)
         play_lemin_game(lmap, game)
