@@ -21,7 +21,6 @@ if len(sys.argv) > 1:
 
 if command_line_mode:
     if len(args) == 0:
-        # try to read game from stdin
         lmap, lc = lemin_map_parser()
         if lmap == None or lemin_map_checker(lmap):
             eprint("error: invalid map")
