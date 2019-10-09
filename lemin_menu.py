@@ -4,10 +4,14 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
 import os
+import subprocess
 from utils import *
 from lemin_map_parser import *
 from lemin_map_checker import *
 from lemin_editor import *
+from lemin_game_parser import *
+from lemin_game_checker import *
+from lemin_player import *
 
 BACKGROUND_COLOR = "DodgerBlue3"
 
@@ -133,5 +137,27 @@ class lemin_menu:
             self.select_solver.current(l)
 
     def play(self):
-        print("play with \"" + self.select_solver.get() + "\" on \""\
-                + self.select_map.get() + "\"")
+        map_name = self.select_map.get()
+        solver_name = self.select_solver.get()
+        if len(map_name) == 0 or len(solver_name) == 0:
+            eprint("error: no map or solver")
+            return
+        map_file = self.maps[map_name]
+        solver_file = self.solvers[solver_name]
+        proc = subprocess.run(solver_file + ' < ' + map_file,\
+                stdout=subprocess.PIPE, shell=True)
+        output = proc.stdout.decode("utf-8").splitlines(keepends=True)
+        i = 0
+        for line in output:
+            i += 1
+            print("line " + str(i) + ": " + line)
+        lmap, lc = lemin_map_parser(output)
+        if lmap == None or lemin_map_checker(lmap):
+            eprint("error: invalid map")
+            return
+        game = lemin_game_parser(lmap, lc, output[lc:])
+        if game == None or lemin_game_checker(game, lmap):
+            eprint("error: invalid solution")
+            return
+        print(game)
+        play_lemin_game(lmap, game)
