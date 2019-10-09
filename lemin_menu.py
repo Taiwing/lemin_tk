@@ -5,6 +5,9 @@ from tkinter import ttk
 from tkinter import filedialog
 import os
 from utils import *
+from lemin_map_parser import *
+from lemin_map_checker import *
+from lemin_editor import *
 
 BACKGROUND_COLOR = "DodgerBlue3"
 
@@ -94,7 +97,17 @@ class lemin_menu:
             self.select_map.current(l)
 
     def edit_map(self):
-        print("edit \"" + self.select_map.get() + "\"")
+        map_name = self.select_map.get()
+        if map_name == None or len(map_name) == 0:
+            eprint("error: no map selected")
+            return
+        map_file = open(self.maps[map_name])
+        lmap, lc = lemin_map_parser(map_file)
+        map_file.close()
+        if lmap == None or lemin_map_checker(lmap):
+            eprint("error: invalid map")
+            return
+        edit_lemin_map(lmap)
 
     def generate_map(self):
         print("generate \"" + self.select_map.get() + "\"")
@@ -122,7 +135,3 @@ class lemin_menu:
     def play(self):
         print("play with \"" + self.select_solver.get() + "\" on \""\
                 + self.select_map.get() + "\"")
-        
-
-menu = lemin_menu()
-menu.win.mainloop()
