@@ -215,6 +215,8 @@ class lemin_player:
     ## main loop function ##
     def play_game(self):
         self.lscr.async_actions()
+        if self.lscr.win == None:
+            return
         if self.play == True and self.lscr.update != U_WAIT:
             if self.turn < self.game_len - 1:
                 self.step += 1

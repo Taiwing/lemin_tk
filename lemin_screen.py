@@ -105,10 +105,15 @@ class lemin_screen:
     ## events handling of lemin_screen ##
 
     def init_actions(self):
+        self.win.protocol("WM_DELETE_WINDOW", self.close_handler)
         self.can.bind("<Configure>", self.configure_handler)
         self.win.bind("+", self.plus_handler)
         self.win.bind("-", self.minus_handler)
         self.win.bind("*", self.star_handler)
+
+    def close_handler(self):
+        self.stack.clear()
+        self.stack.insert(0, self.close_window)
         
     def configure_handler(self, event):
         self.stack.insert(0, self.scale_canvas)
@@ -123,6 +128,10 @@ class lemin_screen:
 
     def star_handler(self, event):
         self.stack.insert(0, self.toggle_print_unused_rooms)
+
+    def close_window(self):
+        self.win.destroy()
+        self.win = None
 
     def scale_canvas(self):
         self.update = U_REDRAW

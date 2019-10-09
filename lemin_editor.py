@@ -418,6 +418,8 @@ class lemin_editor:
     ## main loop function ##
     def edit_map(self):
         self.lscr.async_actions()
+        if self.lscr.win == None:
+            return
         self.lscr.update_screen()
         self.lscr.win.after(1, self.edit_map)
 
