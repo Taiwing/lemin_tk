@@ -60,11 +60,12 @@ class lemin_menu:
             padx=10, pady=10)
         self.add_map_button.pack()
         self.edit_map_button = Button(self.frame, text="edit map",\
-            command=self.edit_map, highlightbackground=BACKGROUND_COLOR)
+            command=self.edit_map, highlightbackground=BACKGROUND_COLOR,\
+            state=DISABLED)
         self.edit_map_button.pack()
         self.generate_map_button = Button(self.frame, text="generate map",\
             command=self.generate_map, highlightbackground=BACKGROUND_COLOR,\
-            padx=10, pady=10)
+            state=DISABLED, padx=10, pady=10)
         self.generate_map_button.pack()
         self.select_solver.pack()
         self.add_solver_button = Button(self.frame, text="add solver",\
@@ -72,7 +73,8 @@ class lemin_menu:
             padx=10, pady=10)
         self.add_solver_button.pack()
         self.play_button = Button(self.frame, text="play",\
-            command=self.play, highlightbackground=BACKGROUND_COLOR)
+            command=self.play, highlightbackground=BACKGROUND_COLOR,\
+            state=DISABLED)
         self.play_button.pack()
 
     def get_start_pos(self):
@@ -98,6 +100,10 @@ class lemin_menu:
                 self.select_map["values"] += (map_name,)
             else:
                 self.select_map["values"] = (map_name)
+                self.edit_map_button.configure(state=NORMAL)
+            if self.play_button["state"] == DISABLED:
+                if len(self.solvers) != 0:
+                    self.play_button.configure(state=NORMAL)
             self.select_map.current(l)
 
     def edit_map(self):
@@ -114,7 +120,7 @@ class lemin_menu:
         edit_lemin_map(lmap)
 
     def generate_map(self):
-        print("generate map") 
+        pass
 
     def add_solver(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
@@ -134,6 +140,9 @@ class lemin_menu:
                 self.select_solver["values"] += (solver_name,)
             else:
                 self.select_solver["values"] = (solver_name)
+            if self.play_button["state"] == DISABLED:
+                if len(self.maps) != 0:
+                    self.play_button.configure(state=NORMAL)
             self.select_solver.current(l)
 
     def play(self):
