@@ -426,3 +426,4 @@ class lemin_editor:
 def edit_lemin_map(lmap):    
    e = lemin_editor(lmap) 
    e.lscr.win.mainloop()
+   return e.file # for storing the file in the menu's combobox

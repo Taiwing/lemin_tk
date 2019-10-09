@@ -57,14 +57,13 @@ class lemin_menu:
         self.add_map_button = Button(self.frame, text="add map",\
             command=self.add_map, highlightbackground=BACKGROUND_COLOR)
         self.add_map_button.pack(padx=5, pady=5)
+        self.new_map_button = Button(self.frame, text="new map",\
+            command=self.new_map, highlightbackground=BACKGROUND_COLOR)
+        self.new_map_button.pack(padx=5, pady=5)
         self.edit_map_button = Button(self.frame, text="edit map",\
             command=self.edit_map, highlightbackground=BACKGROUND_COLOR,\
             state=DISABLED)
         self.edit_map_button.pack(padx=5, pady=5)
-        self.new_map_button = Button(self.frame, text="new map",\
-            command=self.new_map, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
-        self.new_map_button.pack(padx=5, pady=5)
         self.generate_map_button = Button(self.frame, text="generate map",\
             command=self.generate_map, highlightbackground=BACKGROUND_COLOR,\
             state=DISABLED)
@@ -86,6 +85,9 @@ class lemin_menu:
     def add_map(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
                 title = "Select map")
+        self.add_map_file(file_name)
+
+    def add_map_file(self, file_name):
         if file_name != None and len(file_name) > 0:
             map_name = os.path.basename(file_name)
             if map_name not in self.maps:
@@ -118,10 +120,13 @@ class lemin_menu:
         if lmap == None or lemin_map_checker(lmap):
             eprint("error: invalid map")
             return
-        edit_lemin_map(lmap)
+        file_name = edit_lemin_map(lmap)
+        self.add_map_file(file_name)
 
     def new_map(self):
-        pass
+        file_name = edit_lemin_map(None)
+        print("file_name:", file_name)
+        self.add_map_file(file_name)
 
     def generate_map(self):
         pass
