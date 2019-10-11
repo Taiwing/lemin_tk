@@ -29,52 +29,48 @@ class lemin_menu:
         self.win.resizable(width=False, height=False)
         # frame data
         self.frame = Frame(self.win, bg=BACKGROUND_COLOR)
-        self.frame.pack(fill="both", expand=True)
         # label
         self.logo = Label(self.frame, text="LEMIN_TK",\
             font=("Helvetica", 48, "italic"),\
             fg="blue4", bg=BACKGROUND_COLOR)
-        self.logo.pack(padx=20, pady=20)
         # comboboxes
         self.combostyle = ttk.Style()
         self.combostyle.theme_create("combostyle", parent="alt",\
-            settings = {"TCombobox":\
-                        {"configure":\
-#                            {"selectbackground": "blue",\
-#                            "fieldbackground": "white",\
-#                            "highlightbackground": BACKGROUND_COLOR,\
-#                            "background": "white"}}})
-                            {"highlightbackground": BACKGROUND_COLOR}}})
+            settings = {"TCombobox": {"configure":\
+                        {"highlightbackground": BACKGROUND_COLOR}}})
         self.combostyle.theme_use("combostyle")
         self.maps = {}
         self.select_map = ttk.Combobox(self.frame, state="readonly")
         self.select_map.set("          -- select map --")
-        self.select_map.pack(padx=10, pady=10)
         self.solvers = {}
         self.select_solver = ttk.Combobox(self.frame, state="readonly")
         self.select_solver.set("        -- select solver --")
         # buttons
         self.add_map_button = Button(self.frame, text="add map",\
             command=self.add_map, highlightbackground=BACKGROUND_COLOR)
-        self.add_map_button.pack(padx=5, pady=5)
         self.new_map_button = Button(self.frame, text="new map",\
             command=self.new_map, highlightbackground=BACKGROUND_COLOR)
-        self.new_map_button.pack(padx=5, pady=5)
         self.edit_map_button = Button(self.frame, text="edit map",\
             command=self.edit_map, highlightbackground=BACKGROUND_COLOR,\
             state=DISABLED)
-        self.edit_map_button.pack(padx=5, pady=5)
         self.generate_map_button = Button(self.frame, text="generate map",\
             command=self.generate_map, highlightbackground=BACKGROUND_COLOR,\
             state=DISABLED)
-        self.generate_map_button.pack(padx=5, pady=5)
-        self.select_solver.pack(padx=10, pady=10)
         self.add_solver_button = Button(self.frame, text="add solver",\
             command=self.add_solver, highlightbackground=BACKGROUND_COLOR)
-        self.add_solver_button.pack(padx=5, pady=5)
         self.play_button = Button(self.frame, text="play",\
             command=self.play, highlightbackground=BACKGROUND_COLOR,\
             state=DISABLED)
+        # packing
+        self.frame.pack(fill="both", expand=True)
+        self.logo.pack(padx=20, pady=20)
+        self.select_map.pack(padx=10, pady=10)
+        self.add_map_button.pack(padx=5, pady=5)
+        self.new_map_button.pack(padx=5, pady=5)
+        self.edit_map_button.pack(padx=5, pady=5)
+        self.generate_map_button.pack(padx=5, pady=5)
+        self.select_solver.pack(padx=10, pady=10)
+        self.add_solver_button.pack(padx=5, pady=5)
         self.play_button.pack(padx=5, pady=5)
 
     def get_start_pos(self):
