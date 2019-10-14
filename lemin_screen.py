@@ -26,12 +26,69 @@ START_ROOM_COLOR = "purple4"
 END_ROOM_COLOR = "DarkGoldenrod1"
 LINK_COLOR = "black"
 
-class lemin_screen:
-    def __init__(self, lmap, redrawf, movef, refreshf, waitf):
+class lemin_window:
+    def __init__(self):
         # window data
         self.win = Tk()
         self.screen_width = self.win.winfo_screenwidth()
         self.screen_height = self.win.winfo_screenheight()
+        # update state
+        self.update = U_NONE
+        # update functions
+        self.redrawf = None
+        self.movef = None
+        self.refreshf = None
+        self.waitf = None
+        self.updatef = None
+        # asynchronous actions stack (FIFO)
+        self.stack = []
+        # close handler (TEMP: will be moved to a set_bindings funtion)
+        self.win.protocol("WM_DELETE_WINDOW", self.close_handler)
+
+    def load_drawf(self, redrawf, movef, refreshf, waitf, updatef):
+        self.redrawf = redrawf
+        self.movef = movef
+        self.refreshf = refreshf
+        self.waitf = waitf
+        self.updatef = updatef
+
+    def close_handler(self):
+        self.stack.clear()
+        self.stack.insert(0, self.close)
+
+    def close(self):
+        self.win.destroy()
+        self.win = None
+    
+    def update_update(self, upid):
+        return upid if self.update < upid else self.update
+
+    ## main loop functions ##
+    def async_actions(self):
+        while len(self.stack) > 0:
+            af = self.stack.pop()
+            af()
+
+    def update_screen(self):
+        if self.update == U_REDRAW:
+            self.redrawf()
+            self.updatef()
+            self.update = U_NONE
+        elif self.update == U_MOVE:
+            self.movef()
+            self.updatef()
+            self.update = U_NONE
+        elif self.update == U_REFRESH:
+            self.refreshf()
+            self.updatef()
+        elif self.update == U_WAIT:
+            self.waitf()
+
+class lemin_screen:
+    def __init__(self, lwin, lmap, redrawf, movef, refreshf, waitf):
+        # window data #TEMP TODO: remove window data
+        self.lwin = lwin #MAYBE KEEP
+        self.lwin.load_drawf(redrawf, movef, refreshf, waitf, None)
         # canvas data
         self.can = None
         self.canvas_w = 0
@@ -43,24 +100,15 @@ class lemin_screen:
         self.orig_y = 0
         # grid data
         # TODO: remove G_SIDE_MIN from grid parameters when config struct is on
-        self.grid = lemin_grid(lmap, self.screen_width, self.screen_height, G_SIDE_MIN)
+        self.grid = lemin_grid(lmap, self.lwin.screen_width, self.lwin.screen_height, G_SIDE_MIN)
         # graphical objects
         self.lmap = lmap
         self.print_unused = G_PRINT_UNUSED_DEF
         self.roomn = len(lmap.rooms) # only printed rooms (all by default)
-        # update state
-        self.update = U_NONE
-        # asynchronous actions stack (FIFO)
-        self.stack = []
-        # update_screen functions
-        self.redrawf = redrawf
-        self.movef = movef
-        self.refreshf = refreshf
-        self.waitf = waitf
 
     def init_canvas(self, init_mode_actions):
-        self.grid.get_min(self.screen_width,\
-        self.screen_height, self.roomn)
+        self.grid.get_min(self.lwin.screen_width,\
+        self.lwin.screen_height, self.roomn)
         if self.grid.big_width * self.grid.big_height < self.roomn:
             # TODO: add a call to remove_unused here and check if it works
             # TODO: also replace the next elif by a if so that it always
@@ -76,24 +124,26 @@ class lemin_screen:
         self.set_min_window()
 
     def build_canvas(self, init_mode_actions):
-        self.canvas_w = self.screen_width / G_SCREEN_DIV 
-        self.canvas_h = self.screen_height / G_SCREEN_DIV 
+        self.canvas_w = self.lwin.screen_width / G_SCREEN_DIV 
+        self.canvas_h = self.lwin.screen_height / G_SCREEN_DIV 
         if self.get_side_size():
             # if default window is not big enough
             self.canvas_w = (self.grid.width + 2) * G_SIDE_MIN
             self.canvas_h = (self.grid.height + 2) * G_SIDE_MIN
             self.get_side_size()
-        self.can = Canvas(self.win, width=self.canvas_w, height=self.canvas_h,\
+        self.can = Canvas(self.lwin.win, width=self.canvas_w, height=self.canvas_h,\
         bg=BACKGROUND_COLOR)
+        self.lwin.updatef = self.can.update
         self.can.pack(side=TOP, fill=BOTH, expand=1)
         self.init_actions()
         init_mode_actions()
+        self.lwin.redrawf()
         self.can.update()
 
     def set_min_window(self):
         win_w_min = (self.grid.width + 2) * G_SIDE_MIN
         win_h_min = (self.grid.height + 2) * G_SIDE_MIN
-        self.win.minsize(win_w_min, win_h_min)
+        self.lwin.win.minsize(win_w_min, win_h_min)
 
     def get_side_size(self):
         self.side = min(self.canvas_w / (self.grid.width + 2),\
@@ -103,38 +153,28 @@ class lemin_screen:
         return 1 if self.side < G_SIDE_MIN else 0
 
     ## events handling of lemin_screen ##
-
     def init_actions(self):
-        self.win.protocol("WM_DELETE_WINDOW", self.close_handler)
         self.can.bind("<Configure>", self.configure_handler)
-        self.win.bind("+", self.plus_handler)
-        self.win.bind("-", self.minus_handler)
-        self.win.bind("*", self.star_handler)
-
-    def close_handler(self):
-        self.stack.clear()
-        self.stack.insert(0, self.close_window)
+        self.lwin.win.bind("+", self.plus_handler)
+        self.lwin.win.bind("-", self.minus_handler)
+        self.lwin.win.bind("*", self.star_handler)
         
     def configure_handler(self, event):
-        self.stack.insert(0, self.scale_canvas)
+        self.lwin.stack.insert(0, self.scale_canvas)
         self.redraw_w = event.width
         self.redraw_h = event.height
     
     def plus_handler(self, event):
-        self.stack.insert(0, self.compress_map)
+        self.lwin.stack.insert(0, self.compress_map)
 
     def minus_handler(self, event):
-        self.stack.insert(0, self.uncompress_map)
+        self.lwin.stack.insert(0, self.uncompress_map)
 
     def star_handler(self, event):
-        self.stack.insert(0, self.toggle_print_unused_rooms)
-
-    def close_window(self):
-        self.win.destroy()
-        self.win = None
+        self.lwin.stack.insert(0, self.toggle_print_unused_rooms)
 
     def scale_canvas(self):
-        self.update = U_REDRAW
+        self.lwin.updtate = U_REDRAW
         self.canvas_w = self.redraw_w
         self.canvas_h = self.redraw_h
 
@@ -146,7 +186,7 @@ class lemin_screen:
         compress_coordinates(self, compression="cust",\
         w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
         self.set_min_window()
-        self.update = U_REDRAW
+        self.lwin.updtate = U_REDRAW
 
     def uncompress_map(self):
         self.grid.w_comp = self.grid.w_comp_min if self.grid.w_comp - 5 < self.grid.w_comp_min\
@@ -156,7 +196,7 @@ class lemin_screen:
         compress_coordinates(self, compression="cust",\
         w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
         self.set_min_window()
-        self.update = U_REDRAW
+        self.lwin.updtate = U_REDRAW
     
     def toggle_print_unused_rooms(self):
         if self.print_unused == True:
@@ -166,7 +206,7 @@ class lemin_screen:
             self.print_unused = True
             restore_unused_rooms(self)
             self.set_min_window()
-        self.update = U_REDRAW
+        self.lwin.updtate = U_REDRAW
 
     ## drawing functions specific to lemin_screen ##
     def draw_map(self):
@@ -246,27 +286,3 @@ class lemin_screen:
         x1, y1 = self.grid_to_graphical(g_x1, g_y1)
         x2, y2 = self.grid_to_graphical(g_x2, g_y2)
         return x1, y1, x2, y2
-    
-    def update_update(self, upid):
-        return upid if self.update < upid else self.update
-
-    ## main loop functions ##
-    def async_actions(self):
-        while len(self.stack) > 0:
-            af = self.stack.pop()
-            af()
-
-    def update_screen(self):
-        if self.update == U_REDRAW:
-            self.redrawf()
-            self.can.update()
-            self.update = U_NONE
-        elif self.update == U_MOVE:
-            self.movef()
-            self.can.update()
-            self.update = U_NONE
-        elif self.update == U_REFRESH:
-            self.refreshf()
-            self.can.update()
-        elif self.update == U_WAIT:
-            self.waitf()

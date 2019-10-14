@@ -8,27 +8,23 @@ import subprocess
 from utils import *
 from lemin_map_parser import *
 from lemin_map_checker import *
-from lemin_editor import *
 from lemin_game_parser import *
 from lemin_game_checker import *
-from lemin_player import *
 
 BACKGROUND_COLOR = "DodgerBlue3"
 
 class lemin_menu:
     def __init__(self, lwin):
         # window data
-        self.win = lwin.win #TEMP TODO: remove this
-        self.screen_width = lwin.screen_width #TEMP
-        self.screen_height = lwin.screen_height #TEMP
+        self.lwin = lwin
         self.win_w = 300
         self.win_h = 500
         x, y = self.get_start_pos()
-        self.win.geometry(str(self.win_w) + "x" + str(self.win_h) + "+"\
+        self.lwin.win.geometry(str(self.win_w) + "x" + str(self.win_h) + "+"\
             + str(x) + "+" + str(y))
-        self.win.resizable(width=False, height=False)
+        self.lwin.win.resizable(width=False, height=False)
         # frame data
-        self.frame = Frame(self.win, bg=BACKGROUND_COLOR)
+        self.frame = Frame(self.lwin.win, bg=BACKGROUND_COLOR)
         # label
         self.logo = Label(self.frame, text="LEMIN_TK",\
             font=("Helvetica", 48, "italic"),\
@@ -74,10 +70,30 @@ class lemin_menu:
         self.play_button.pack(padx=5, pady=5)
 
     def get_start_pos(self):
-        x = (self.screen_width / 2) - (self.win_w / 2)
-        y = (self.screen_height / 2) - (self.win_h / 2)
+        x = (self.lwin.screen_width / 2) - (self.win_w / 2)
+        y = (self.lwin.screen_height / 2) - (self.win_h / 2)
         return int(x), int(y)
+        
+    ## menu handlers ##
+    def add_map_handler(self):
+        self.lwin.stack.insert(0, self.add_map)
+    
+    def new_map_handler(self):
+        self.lwin.stack.insert(0, self.new_map)
+    
+    def edit_map_handler(self):
+        self.lwin.stack.insert(0, self.edit_map)
+    
+    def generate_map_handler(self):
+        self.lwin.stack.insert(0, self.generate_map)
+    
+    def add_solver_handler(self):
+        self.lwin.stack.insert(0, self.add_solver)
+    
+    def play_handler(self):
+        self.lwin.stack.insert(0, self.play)
 
+    ## menu functions ##
     def add_map(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
                 title = "Select map")
@@ -116,12 +132,13 @@ class lemin_menu:
         if lmap == None or lemin_map_checker(lmap):
             eprint("error: invalid map")
             return
-        file_name = edit_lemin_map(lmap)
+        #TODO: switch to edit mode instead of this
+        #file_name = edit_lemin_map(lmap)
         self.add_map_file(file_name)
 
     def new_map(self):
-        file_name = edit_lemin_map(None)
-        print("file_name:", file_name)
+        #TODO: switch to edit mode instead of this
+        #file_name = edit_lemin_map(None)
         self.add_map_file(file_name)
 
     def generate_map(self):
@@ -170,12 +187,12 @@ class lemin_menu:
         if game == None or lemin_game_checker(game, lmap):
             eprint("error: invalid solution")
             return
-        play_lemin_game(lmap, game)
+        #TODO: switch to player mode
     
     ## main loop function ##
-    def show_menu(self):
-        self.lscr.async_actions()
-        if self.lscr.win == None:
+    def mainf(self):
+        self.lwin.async_actions()
+        if self.lwin.win == None:
             return
-        self.lscr.update_screen()
-        self.lscr.win.after(1, self.show_menu)
+        self.lwin.update_screen()
+        self.lwin.win.after(1, self.mainf)

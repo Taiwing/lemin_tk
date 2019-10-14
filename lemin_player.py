@@ -11,13 +11,13 @@ G_DELAY_DEF = 300 # wait time at each room
 ANT_COLOR = "red"
 
 class lemin_player:
-    def __init__(self, lmap, game):
+    def __init__(self, lwin, lmap, game):
         # lemin screen
-        self.lscr = lemin_screen(lmap, self.redraw,\
+        self.lscr = lemin_screen(lwin, lmap, self.redraw,\
         self.move, self.refresh, self.wait)
         tag_used_rooms(game, lmap.rooms)
         self.lscr.init_canvas(self.init_player_actions)
-        self.lscr.win.after(0, self.play_game)
+        self.lscr.lwin.win.after(0, self.play_game)
         # graphical objects
         self.ants = []
         # movements
@@ -33,35 +33,35 @@ class lemin_player:
 
     ## event handling of lemin_player ##
     def init_player_actions(self):
-        self.lscr.win.bind("<space>", self.space_handler)
-        self.lscr.win.bind("<Left>", self.left_handler)
-        self.lscr.win.bind("<Right>", self.right_handler)
-        self.lscr.win.bind("<Up>", self.up_handler)
-        self.lscr.win.bind("<Down>", self.down_handler)
-        self.lscr.win.bind("r", self.r_handler)
-        self.lscr.win.bind("e", self.e_handler)
-        self.lscr.win.bind("d", self.d_handler)
+        self.lscr.lwin.win.bind("<space>", self.space_handler)
+        self.lscr.lwin.win.bind("<Left>", self.left_handler)
+        self.lscr.lwin.win.bind("<Right>", self.right_handler)
+        self.lscr.lwin.win.bind("<Up>", self.up_handler)
+        self.lscr.lwin.win.bind("<Down>", self.down_handler)
+        self.lscr.lwin.win.bind("r", self.r_handler)
+        self.lscr.lwin.win.bind("e", self.e_handler)
+        self.lscr.lwin.win.bind("d", self.d_handler)
     
     def space_handler(self, event):
-        self.lscr.stack.insert(0, self.play_pause)
+        self.lscr.lwin.stack.insert(0, self.play_pause)
 
     def left_handler(self, event):
-        self.lscr.stack.insert(0, self.back_one_turn)
+        self.lscr.lwin.stack.insert(0, self.back_one_turn)
 
     def right_handler(self, event):
-        self.lscr.stack.insert(0, self.forward_one_turn)
+        self.lscr.lwin.stack.insert(0, self.forward_one_turn)
 
     def up_handler(self, event):
-        self.lscr.stack.insert(0, self.speed_up)
+        self.lscr.lwin.stack.insert(0, self.speed_up)
 
     def down_handler(self, event):
-        self.lscr.stack.insert(0, self.speed_down)
+        self.lscr.lwin.stack.insert(0, self.speed_down)
 
     def r_handler(self, event):
-        self.lscr.stack.insert(0, self.reset)
+        self.lscr.lwin.stack.insert(0, self.reset)
 
     def e_handler(self, event):
-        self.lscr.stack.insert(0, self.go_to_end)
+        self.lscr.lwin.stack.insert(0, self.go_to_end)
 
     def d_handler(self, event):
         self.debug()
@@ -75,14 +75,14 @@ class lemin_player:
         elif self.turn > 0:
             self.turn -= 1
         self.play = False
-        self.lscr.update = self.lscr.update_update(U_REFRESH)
+        self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def forward_one_turn(self):
         if self.turn < self.game_len - 1:
             self.turn += 1
             self.play = False
             self.step = 0
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def speed_up(self):
         if self.framec > G_FRAMEC_MIN:
@@ -90,7 +90,7 @@ class lemin_player:
             self.framec -= G_FRAMEC_STEP
             if self.step > 0 and self.turn < self.game_len - 1:
                 self.step = (self.step / orig_framec) * self.framec
-                self.lscr.update = self.lscr.update_update(U_MOVE)
+                self.lscr.lwin.update = self.lscr.lwin.update_update(U_MOVE)
 
     def speed_down(self):
         if self.framec < G_FRAMEC_MAX:
@@ -98,33 +98,33 @@ class lemin_player:
             self.framec += G_FRAMEC_STEP
             if self.step > 0:
                 self.step = (self.step / orig_framec) * self.framec
-                self.lscr.update = self.lscr.update_update(U_MOVE)
+                self.lscr.lwin.update = self.lscr.lwin.update_update(U_MOVE)
     
     def reset(self):
         self.play = False
         self.step = 0
         self.turn = 0
-        self.lscr.update = self.lscr.update_update(U_REFRESH)
+        self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def go_to_end(self):
         self.play = False
         self.step = 0
         self.turn = self.game_len - 1
-        self.lscr.update = self.lscr.update_update(U_REFRESH)
+        self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
     
     def debug(self):
         print("self.turn:", self.turn, "/", self.game_len)
         print("self.step:", self.step)
         print("self.play:", "True" if self.play == True else "False")
-        print("self.lscr.update:",\
-        "U_NONE" if self.lscr.update == U_NONE else\
-        "U_WAIT" if self.lscr.update == U_WAIT else\
-        "U_REFRESH" if self.lscr.update == U_REFRESH else\
-        "U_MOVE" if self.lscr.update == U_MOVE else\
-        "U_REDRAW" if self.lscr.update == U_REDRAW else\
+        print("self.lscr.lwin.update:",\
+        "U_NONE" if self.lscr.lwin.update == U_NONE else\
+        "U_WAIT" if self.lscr.lwin.update == U_WAIT else\
+        "U_REFRESH" if self.lscr.lwin.update == U_REFRESH else\
+        "U_MOVE" if self.lscr.lwin.update == U_MOVE else\
+        "U_REDRAW" if self.lscr.lwin.update == U_REDRAW else\
         "ERROR")
-        print("len(self.lscr.stack)", len(self.lscr.stack))
-        print("self.lscr.stack:", self.lscr.stack)
+        print("len(self.lscr.lwin.stack)", len(self.lscr.lwin.stack))
+        print("self.lscr.lwin.stack:", self.lscr.lwin.stack)
         print("self.lscr.grid.w_comp =", self.lscr.grid.w_comp)
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
 
@@ -204,35 +204,35 @@ class lemin_player:
         else:
             self.fix()
             self.waitc = G_DELAY_DEF
-            self.lscr.update = U_WAIT
+            self.lscr.lwin.update = U_WAIT
 
     def wait(self):
         if self.waitc > 0:
             self.waitc -= 1
         else:
-            self.lscr.update = U_NONE
+            self.lscr.lwin.update = U_NONE
     
     ## main loop function ##
     def play_game(self):
-        self.lscr.async_actions()
-        if self.lscr.win == None:
+        self.lscr.lwin.async_actions()
+        if self.lscr.lwin.win == None:
             return
-        if self.play == True and self.lscr.update != U_WAIT:
+        if self.play == True and self.lscr.lwin.update != U_WAIT:
             if self.turn < self.game_len - 1:
                 self.step += 1
                 if self.step == 1:
-                    self.lscr.update = self.lscr.update_update(U_MOVE)
+                    self.lscr.lwin.update = self.lscr.lwin.update_update(U_MOVE)
                 elif self.step < self.framec:
-                    self.lscr.update = self.lscr.update_update(U_REFRESH)
+                    self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
                 else:
                     self.step = 0
                     self.turn += 1
-                    self.lscr.update = self.lscr.update_update(U_REFRESH)
+                    self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
             else:
                 self.play = False
-        self.lscr.update_screen()
-        self.lscr.win.after(1, self.play_game)
+        self.lscr.lwin.update_screen()
+        self.lscr.lwin.win.after(1, self.play_game)
 
 def play_lemin_game(lmap, game):    
    g = lemin_player(lmap, game) 
-   g.lscr.win.mainloop()
+   g.lscr.lwin.win.mainloop()

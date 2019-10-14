@@ -10,14 +10,14 @@ E_GRID_HEIGHT_DEF = 90
 CURSOR_COLOR = "DarkOrange3"
 
 class lemin_editor:
-    def __init__(self, lmap=None):
+    def __init__(self, lwin, lmap=None):
         if lmap == None:
             lmap = self.new_map()
         # lemin screen
-        self.lscr = lemin_screen(lmap, self.redraw,\
+        self.lscr = lemin_screen(lwin, lmap, self.redraw,\
         self.move, self.refresh, self.wait)
         self.lscr.init_canvas(self.init_editor_actions)
-        self.lscr.win.after(0, self.edit_map)
+        self.lscr.lwin.win.after(0, self.edit_map)
         # cursor data
         self.cur_x = 0
         self.cur_y = 0
@@ -74,139 +74,139 @@ class lemin_editor:
 
     ## event handling of lemin_editor ##
     def init_editor_actions(self):
-        self.lscr.win.bind("<Left>", self.left_handler)
-        self.lscr.win.bind("<Right>", self.right_handler)
-        self.lscr.win.bind("<Up>", self.up_handler)
-        self.lscr.win.bind("<Down>", self.down_handler)
-        self.lscr.win.bind("<Home>", self.home_handler)
-        self.lscr.win.bind("<End>", self.end_handler)
-        self.lscr.win.bind("<Prior>", self.prior_handler)
-        self.lscr.win.bind("<Next>", self.next_handler)
-        self.lscr.win.bind("h", self.h_handler)
-        self.lscr.win.bind("l", self.l_handler)
-        self.lscr.win.bind("k", self.k_handler)
-        self.lscr.win.bind("j", self.j_handler)
-        self.lscr.win.bind("s", self.s_handler)
-        self.lscr.win.bind("e", self.e_handler)
-        self.lscr.win.bind("r", self.r_handler)
-        self.lscr.win.bind("c", self.c_handler)
-        self.lscr.win.bind("d", self.d_handler)
-        self.lscr.win.bind("m", self.m_handler)
-        self.lscr.win.bind("p", self.p_handler)
-        self.lscr.win.bind("<Control-s>", self.control_s_handler)
-        self.lscr.win.bind("<Command-s>", self.control_s_handler)
-        self.lscr.win.bind("<Control-S>", self.control_shift_s_handler)
-        self.lscr.win.bind("<Command-S>", self.control_shift_s_handler)
+        self.lscr.lwin.win.bind("<Left>", self.left_handler)
+        self.lscr.lwin.win.bind("<Right>", self.right_handler)
+        self.lscr.lwin.win.bind("<Up>", self.up_handler)
+        self.lscr.lwin.win.bind("<Down>", self.down_handler)
+        self.lscr.lwin.win.bind("<Home>", self.home_handler)
+        self.lscr.lwin.win.bind("<End>", self.end_handler)
+        self.lscr.lwin.win.bind("<Prior>", self.prior_handler)
+        self.lscr.lwin.win.bind("<Next>", self.next_handler)
+        self.lscr.lwin.win.bind("h", self.h_handler)
+        self.lscr.lwin.win.bind("l", self.l_handler)
+        self.lscr.lwin.win.bind("k", self.k_handler)
+        self.lscr.lwin.win.bind("j", self.j_handler)
+        self.lscr.lwin.win.bind("s", self.s_handler)
+        self.lscr.lwin.win.bind("e", self.e_handler)
+        self.lscr.lwin.win.bind("r", self.r_handler)
+        self.lscr.lwin.win.bind("c", self.c_handler)
+        self.lscr.lwin.win.bind("d", self.d_handler)
+        self.lscr.lwin.win.bind("m", self.m_handler)
+        self.lscr.lwin.win.bind("p", self.p_handler)
+        self.lscr.lwin.win.bind("<Control-s>", self.control_s_handler)
+        self.lscr.lwin.win.bind("<Command-s>", self.control_s_handler)
+        self.lscr.lwin.win.bind("<Control-S>", self.control_shift_s_handler)
+        self.lscr.lwin.win.bind("<Command-S>", self.control_shift_s_handler)
 
     def left_handler(self, event):
-        self.lscr.stack.insert(0, self.move_left)
+        self.lscr.lwin.stack.insert(0, self.move_left)
 
     def right_handler(self, event):
-        self.lscr.stack.insert(0, self.move_right)
+        self.lscr.lwin.stack.insert(0, self.move_right)
 
     def up_handler(self, event):
-        self.lscr.stack.insert(0, self.move_up)
+        self.lscr.lwin.stack.insert(0, self.move_up)
 
     def down_handler(self, event):
-        self.lscr.stack.insert(0, self.move_down)
+        self.lscr.lwin.stack.insert(0, self.move_down)
 
     def home_handler(self, event):
-        self.lscr.stack.insert(0, self.move_all_left)
+        self.lscr.lwin.stack.insert(0, self.move_all_left)
 
     def end_handler(self, event):
-        self.lscr.stack.insert(0, self.move_all_right)
+        self.lscr.lwin.stack.insert(0, self.move_all_right)
 
     def prior_handler(self, event):
-        self.lscr.stack.insert(0, self.move_all_up)
+        self.lscr.lwin.stack.insert(0, self.move_all_up)
 
     def next_handler(self, event):
-        self.lscr.stack.insert(0, self.move_all_down)
+        self.lscr.lwin.stack.insert(0, self.move_all_down)
 
     def h_handler(self, event):
-        self.lscr.stack.insert(0, self.move_to_left_room)
+        self.lscr.lwin.stack.insert(0, self.move_to_left_room)
 
     def l_handler(self, event):
-        self.lscr.stack.insert(0, self.move_to_right_room)
+        self.lscr.lwin.stack.insert(0, self.move_to_right_room)
 
     def k_handler(self, event):
-        self.lscr.stack.insert(0, self.move_to_up_room)
+        self.lscr.lwin.stack.insert(0, self.move_to_up_room)
 
     def j_handler(self, event):
-        self.lscr.stack.insert(0, self.move_to_down_room)
+        self.lscr.lwin.stack.insert(0, self.move_to_down_room)
 
     def s_handler(self, event):
-        self.lscr.stack.insert(0, self.put_start)
+        self.lscr.lwin.stack.insert(0, self.put_start)
 
     def e_handler(self, event):
-        self.lscr.stack.insert(0, self.put_end)
+        self.lscr.lwin.stack.insert(0, self.put_end)
 
     def r_handler(self, event):
-        self.lscr.stack.insert(0, self.put_room)
+        self.lscr.lwin.stack.insert(0, self.put_room)
 
     def c_handler(self, event):
-        self.lscr.stack.insert(0, self.connect)
+        self.lscr.lwin.stack.insert(0, self.connect)
 
     def d_handler(self, event):
-        self.lscr.stack.insert(0, self.delete_room)
+        self.lscr.lwin.stack.insert(0, self.delete_room)
 
     def m_handler(self, event):
-        self.lscr.stack.insert(0, self.move_room)
+        self.lscr.lwin.stack.insert(0, self.move_room)
 
     def p_handler(self, event):
         self.debug()
         
     def control_s_handler(self, event):
-        self.lscr.stack.insert(0, self.save_map)
+        self.lscr.lwin.stack.insert(0, self.save_map)
 
     def control_shift_s_handler(self, event):
-        self.lscr.stack.insert(0, self.save_map_as)
+        self.lscr.lwin.stack.insert(0, self.save_map_as)
 
     def move_left(self):
         if self.cur_x > 0:
             self.cur_x -= 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_right(self):
         if self.cur_x < self.lscr.grid.width - 1:
             self.cur_x += 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_up(self):
         if self.cur_y > 0:
             self.cur_y -= 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_down(self):
         if self.cur_y < self.lscr.grid.height - 1:
             self.cur_y += 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_all_left(self):
         if self.cur_x != 0:
             self.cur_x = 0
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_all_right(self):
         if self.cur_x != self.lscr.grid.width - 1:
             self.cur_x = self.lscr.grid.width - 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_all_up(self):
         if self.cur_y != 0:
             self.cur_y = 0
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_all_down(self):
         if self.cur_y != self.lscr.grid.height - 1:
             self.cur_y = self.lscr.grid.height - 1
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
 
     def move_to_left_room(self):
         x, y = self.find_room("left")
         if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
         else:
             self.move_left()
 
@@ -215,7 +215,7 @@ class lemin_editor:
         if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
         else:
             self.move_right()
 
@@ -224,7 +224,7 @@ class lemin_editor:
         if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
         else:
             self.move_up()
 
@@ -233,7 +233,7 @@ class lemin_editor:
         if x != -1 and y != -1:
             self.cur_x = x
             self.cur_y = y
-            self.lscr.update = self.lscr.update_update(U_REFRESH)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
         else:
             self.move_down()
 
@@ -243,7 +243,7 @@ class lemin_editor:
             r = self.put_room()
         if r != None and "start" not in self.lscr.lmap.rooms[r].attrs:
             self.lscr.lmap.commands["start"](self.lscr.lmap, r, "start")
-            self.lscr.update = self.lscr.update_update(U_REDRAW)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REDRAW)
 
     def put_end(self):
         r = self.grid[self.cur_x][self.cur_y]
@@ -251,7 +251,7 @@ class lemin_editor:
             r = self.put_room()
         if r != None and "end" not in self.lscr.lmap.rooms[r].attrs:
             self.lscr.lmap.commands["end"](self.lscr.lmap, r, "end")
-            self.lscr.update = self.lscr.update_update(U_REDRAW)
+            self.lscr.lwin.update = self.lscr.lwin.update_update(U_REDRAW)
     
     def put_room(self):
         if self.grid[self.cur_x][self.cur_y] != None:
@@ -268,11 +268,11 @@ class lemin_editor:
         self.lscr.lmap.size += 1
         self.lscr.grid.place_on_orig_grid(name, self.cur_x,\
         self.cur_y, self.lscr.lmap)
-        self.lscr.grid.get_min(self.lscr.screen_width,\
-                self.lscr.screen_height, self.lscr.roomn)
+        self.lscr.grid.get_min(self.lscr.lwin.screen_width,\
+                self.lscr.lwin.screen_height, self.lscr.roomn)
         if self.lnk != None:
             self.connect()
-        self.lscr.update = self.lscr.update_update(U_REDRAW)
+        self.lscr.lwin.update = self.lscr.lwin.update_update(U_REDRAW)
         return name
 
     def connect(self):
@@ -292,7 +292,7 @@ class lemin_editor:
             self.lscr.lmap.rooms[r].links.append(self.lnk)
             self.lscr.lmap.rooms[self.lnk].links.append(r)
         self.lnk = None
-        self.lscr.update = self.lscr.update_update(U_REDRAW)
+        self.lscr.lwin.update = self.lscr.lwin.update_update(U_REDRAW)
 
     def delete_room(self):
         r = self.grid[self.cur_x][self.cur_y]
@@ -309,10 +309,10 @@ class lemin_editor:
         self.lscr.can.delete(self.lscr.lmap.rooms.pop(r).shape)
         self.lscr.lmap.size -= 1
         self.lscr.roomn = len(self.lscr.lmap.rooms)
-        self.lscr.grid.get_min(self.lscr.screen_width,\
-                self.lscr.screen_height, self.lscr.roomn)
+        self.lscr.grid.get_min(self.lscr.lwin.screen_width,\
+                self.lscr.lwin.screen_height, self.lscr.roomn)
         self.grid[self.cur_x][self.cur_y] = None
-        self.lscr.update = self.lscr.update_update(U_REDRAW)
+        self.lscr.lwin.update = self.lscr.lwin.update_update(U_REDRAW)
 
     def move_room(self):
         r = self.grid[self.cur_x][self.cur_y]
@@ -324,7 +324,7 @@ class lemin_editor:
                 self.lscr.grid.place_on_orig_grid(self.move, self.cur_x,\
                 self.cur_y, self.lscr.lmap)
                 self.move = None
-                self.lscr.update = self.lscr.update_update(U_REDRAW)
+                self.lscr.lwin.update = self.lscr.lwin.update_update(U_REDRAW)
         elif self.move == None:
             self.move = r
 
@@ -417,11 +417,11 @@ class lemin_editor:
     
     ## main loop function ##
     def edit_map(self):
-        self.lscr.async_actions()
-        if self.lscr.win == None:
+        self.lscr.lwin.async_actions()
+        if self.lscr.lwin.win == None:
             return
-        self.lscr.update_screen()
-        self.lscr.win.after(1, self.edit_map)
+        self.lscr.lwin.update_screen()
+        self.lscr.lwin.win.after(1, self.edit_map)
 
 def edit_lemin_map(lmap):    
    e = lemin_editor(lmap) 

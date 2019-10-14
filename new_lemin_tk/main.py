@@ -44,4 +44,5 @@ else:
 
 lda = lemin_data()
 lda.load_data(mode, lmap, game)
+lda.lwin.win.after(0, lda.data.mainf)
 lda.lwin.win.mainloop()
