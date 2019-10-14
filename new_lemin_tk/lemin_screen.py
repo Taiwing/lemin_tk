@@ -113,7 +113,7 @@ class lemin_screen:
         self.lwin.stack.insert(0, self.toggle_print_unused_rooms)
 
     def scale_canvas(self):
-        self.lwin.updtate = U_REDRAW
+        self.lwin.update = U_REDRAW
         self.canvas_w = self.redraw_w
         self.canvas_h = self.redraw_h
 
@@ -125,7 +125,7 @@ class lemin_screen:
         compress_coordinates(self, compression="cust",\
         w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
         self.set_min_window()
-        self.lwin.updtate = U_REDRAW
+        self.lwin.update = U_REDRAW
 
     def uncompress_map(self):
         self.grid.w_comp = self.grid.w_comp_min if self.grid.w_comp - 5 < self.grid.w_comp_min\
@@ -135,7 +135,7 @@ class lemin_screen:
         compress_coordinates(self, compression="cust",\
         w_comp=self.grid.w_comp, h_comp=self.grid.h_comp)
         self.set_min_window()
-        self.lwin.updtate = U_REDRAW
+        self.lwin.update = U_REDRAW
     
     def toggle_print_unused_rooms(self):
         if self.print_unused == True:
@@ -145,7 +145,7 @@ class lemin_screen:
             self.print_unused = True
             restore_unused_rooms(self)
             self.set_min_window()
-        self.lwin.updtate = U_REDRAW
+        self.lwin.update = U_REDRAW
 
     ## drawing functions specific to lemin_screen ##
     def draw_map(self):
