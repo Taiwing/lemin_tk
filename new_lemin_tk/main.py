@@ -44,6 +44,7 @@ else:
 
 lda = lemin_data()
 lda.load_data(mode, lmap, game)
-lda.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
+if lda.lwin.redrawf:
+    lda.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
 lda.lwin.win.after(0, lda.data.mainf)
 lda.lwin.win.mainloop()

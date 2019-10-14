@@ -3,7 +3,7 @@
 from lemin_window import *
 from lemin_menu import *
 from lemin_editor import *
-#from lemin_player import *
+from lemin_player import *
 
 M_MENU = 1
 M_EDITOR = 2
@@ -21,8 +21,8 @@ class lemin_data:
             self.data = lemin_menu(self.lwin)
         elif self.mode == M_EDITOR:
             self.data = lemin_editor(self.lwin, lmap)
-#        elif self.mode == M_PLAYER:
-#            self.data = lemin_player(self.lwin, lmap, game)
+        elif self.mode == M_PLAYER:
+            self.data = lemin_player(self.lwin, lmap, game)
 
     def switch_mode(self, new_mode, lmap=None, game=None):
         #destroy everything in the window
