@@ -74,25 +74,6 @@ class lemin_menu:
         y = (self.lwin.screen_height / 2) - (self.win_h / 2)
         return int(x), int(y)
         
-    ## menu handlers ##
-    def add_map_handler(self):
-        self.lwin.stack.insert(0, self.add_map)
-    
-    def new_map_handler(self):
-        self.lwin.stack.insert(0, self.new_map)
-    
-    def edit_map_handler(self):
-        self.lwin.stack.insert(0, self.edit_map)
-    
-    def generate_map_handler(self):
-        self.lwin.stack.insert(0, self.generate_map)
-    
-    def add_solver_handler(self):
-        self.lwin.stack.insert(0, self.add_solver)
-    
-    def play_handler(self):
-        self.lwin.stack.insert(0, self.play)
-
     ## menu functions ##
     def add_map(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
@@ -134,12 +115,13 @@ class lemin_menu:
             return
         #TODO: switch to edit mode instead of this
         #file_name = edit_lemin_map(lmap)
-        self.add_map_file(file_name)
+        #self.add_map_file(file_name)
 
     def new_map(self):
         #TODO: switch to edit mode instead of this
         #file_name = edit_lemin_map(None)
-        self.add_map_file(file_name)
+        #self.add_map_file(file_name)
+        pass
 
     def generate_map(self):
         pass
@@ -194,5 +176,4 @@ class lemin_menu:
         self.lwin.async_actions()
         if self.lwin.win == None:
             return
-        self.lwin.update_screen()
         self.lwin.win.after(1, self.mainf)
