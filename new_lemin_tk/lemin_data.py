@@ -25,5 +25,11 @@ class lemin_data:
             self.data = lemin_player(self.lwin, lmap, game)
 
     def switch_mode(self, new_mode, lmap=None, game=None):
-        #destroy everything in the window
+        if self.mode != M_MENU:
+            self.data.events.unbind()
+        self.lwin.reset()
         self.data = self.load_data(new_mode, lmap, game)
+        if new_mode != M_MENU:
+            self.lwin.win.resizable(width=True, height=True)
+            self.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
+#        self.lwin.win.after(0, self.data.mainf)

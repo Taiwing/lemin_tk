@@ -10,8 +10,13 @@ from lemin_map_parser import *
 from lemin_map_checker import *
 from lemin_game_parser import *
 from lemin_game_checker import *
+from switch import *
 
 BACKGROUND_COLOR = "DodgerBlue3"
+
+M_MENU = 1
+M_EDITOR = 2
+M_PLAYER = 3
 
 class lemin_menu:
     def __init__(self, lwin):
@@ -113,11 +118,13 @@ class lemin_menu:
         if lmap == None or lemin_map_checker(lmap):
             eprint("error: invalid map")
             return
+        switch(M_EDITOR, lmap)
         #TODO: switch to edit mode instead of this
         #file_name = edit_lemin_map(lmap)
         #self.add_map_file(file_name)
 
     def new_map(self):
+        switch(M_EDITOR, None)
         #TODO: switch to edit mode instead of this
         #file_name = edit_lemin_map(None)
         #self.add_map_file(file_name)
@@ -169,7 +176,7 @@ class lemin_menu:
         if game == None or lemin_game_checker(game, lmap):
             eprint("error: invalid solution")
             return
-        #TODO: switch to player mode
+        switch(M_PLAYER, lmap, game)
     
     ## main loop function ##
     def mainf(self):

@@ -25,6 +25,16 @@ class player_events:
         lwin.win.bind("r", self.r_handler)
         lwin.win.bind("e", self.e_handler)
         lwin.win.bind("d", self.d_handler)
+
+    def unbind(self, lwin):
+        lwin.win.unbind("<space>")
+        lwin.win.unbind("<Left>")
+        lwin.win.unbind("<Right>")
+        lwin.win.unbind("<Up>")
+        lwin.win.unbind("<Down>")
+        lwin.win.unbind("r")
+        lwin.win.unbind("e")
+        lwin.win.unbind("d")
     
     def space_handler(self, event):
         self.player.lscr.lwin.stack.insert(0, self.player.play_pause)

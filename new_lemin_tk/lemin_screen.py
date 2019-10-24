@@ -64,6 +64,9 @@ class lemin_screen:
         self.grid.w_comp_min = self.grid.w_comp
         self.grid.h_comp_min = self.grid.h_comp
         self.set_min_window()
+        self.set_window_to_canvas()
+        self.can.update()
+        self.lwin.win.update()
 
     def build_canvas(self):
         self.canvas_w = self.lwin.screen_width / G_SCREEN_DIV 
@@ -77,12 +80,17 @@ class lemin_screen:
         bg=BACKGROUND_COLOR)
         self.lwin.updatef = self.can.update
         self.can.pack(side=TOP, fill=BOTH, expand=1)
-        self.can.update()
 
     def set_min_window(self):
-        win_w_min = (self.grid.width + 2) * G_SIDE_MIN
-        win_h_min = (self.grid.height + 2) * G_SIDE_MIN
-        self.lwin.win.minsize(win_w_min, win_h_min)
+        self.lwin.win_w_min = (self.grid.width + 2) * G_SIDE_MIN
+        self.lwin.win_h_min = (self.grid.height + 2) * G_SIDE_MIN
+        self.lwin.win.minsize(self.lwin.win_w_min, self.lwin.win_h_min)
+
+    def set_window_to_canvas(self):
+        width = self.lwin.win.winfo_width()
+        height = self.lwin.win.winfo_height()
+        if width < self.canvas_w or height < self.canvas_h:
+            self.lwin.win.geometry(str(int(self.canvas_w)) + "x" + str(int(self.canvas_h)))
 
     def get_side_size(self):
         self.side = min(self.canvas_w / (self.grid.width + 2),\

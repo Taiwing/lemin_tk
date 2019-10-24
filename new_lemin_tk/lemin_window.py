@@ -15,6 +15,8 @@ class lemin_window:
         self.win = Tk()
         self.screen_width = self.win.winfo_screenwidth()
         self.screen_height = self.win.winfo_screenheight()
+        self.win_w_min = 0
+        self.win_h_min = 0
         # update state
         self.update = U_NONE
         # update functions
@@ -27,6 +29,12 @@ class lemin_window:
         self.stack = []
         # close handler (TEMP: will be moved to a set_bindings funtion)
         self.win.protocol("WM_DELETE_WINDOW", self.close_handler)
+
+    def reset(self):
+        slaves = self.win.pack_slaves()
+        for s in slaves:
+            s.destroy()
+        self.load_drawf(None, None, None, None, None)
 
     def load_drawf(self, redrawf, movef, refreshf, waitf, updatef):
         self.redrawf = redrawf
