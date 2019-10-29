@@ -27,8 +27,6 @@ class lemin_window:
         self.updatef = None
         # asynchronous actions stack (FIFO)
         self.stack = []
-        # close handler (TEMP: will be moved to a set_bindings funtion)
-        self.win.protocol("WM_DELETE_WINDOW", self.close_handler)
 
     def reset(self):
         slaves = self.win.pack_slaves()
@@ -42,14 +40,6 @@ class lemin_window:
         self.refreshf = refreshf
         self.waitf = waitf
         self.updatef = updatef
-
-    def close_handler(self):
-        self.stack.clear()
-        self.stack.insert(0, self.close)
-
-    def close(self):
-        self.win.destroy()
-        self.win = None
     
     def update_update(self, upid):
         return upid if self.update < upid else self.update

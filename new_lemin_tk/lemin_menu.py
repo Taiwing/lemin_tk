@@ -34,23 +34,6 @@ class lemin_menu:
         self.logo = Label(self.frame, text="LEMIN_TK",\
             font=("Helvetica", 48, "italic"),\
             fg="blue4", bg=BACKGROUND_COLOR)
-        # theme
-        self.app_style = ttk.Style()
-        self.app_style.theme_create("app_style", parent="alt",\
-        settings = {
-        "TCombobox": {"configure": {"highlightbackground": BACKGROUND_COLOR}},
-
-        "TButton":       {"configure": {"font"            :("Calibri", 13),
-                                        "background"      : "white",
-                                        "foreground"      : "black",
-                                        "padding"         : "6"},
-
-                            "map"      : {"background"      : [("active", "#0556E2"),
-                                ("disabled", "#8DBAE4")],
-                                        "foreground"      : [("active", 'white'),
-                                ("disabled", "grey")]}
-        }})
-        self.app_style.theme_use("app_style")
         # comboboxes
         self.maps = {}
         self.select_map = ttk.Combobox(self.frame, state="readonly")
