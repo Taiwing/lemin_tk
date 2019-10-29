@@ -33,6 +33,9 @@ class lemin_window:
         for s in slaves:
             s.destroy()
         self.load_drawf(None, None, None, None, None)
+        self.win_w_min = 0
+        self.win_h_min = 0
+        self.win.minsize(self.win_w_min, self.win_h_min)
 
     def load_drawf(self, redrawf, movef, refreshf, waitf, updatef):
         self.redrawf = redrawf

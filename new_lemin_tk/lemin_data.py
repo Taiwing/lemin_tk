@@ -30,7 +30,7 @@ class lemin_data:
 #        if self.mode != M_MENU:
 #            self.data.events.unbind()
         self.lwin.reset()
-        self.data = self.load_data(new_mode, lmap, game)
+        self.load_data(new_mode, lmap, game)
         if new_mode != M_MENU:
             self.lwin.win.resizable(width=True, height=True)
             self.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
