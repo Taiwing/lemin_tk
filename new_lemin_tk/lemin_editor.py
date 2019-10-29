@@ -40,7 +40,7 @@ class editor_events:
         lwin.win.bind("<Control-S>", self.control_shift_s_handler)
         lwin.win.bind("<Command-S>", self.control_shift_s_handler)
         
-    def unbind(self):
+    def unbind(self, lwin):
         lwin.win.unbind("<Left>")
         lwin.win.unbind("<Right>")
         lwin.win.unbind("<Up>")

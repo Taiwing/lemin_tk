@@ -27,8 +27,8 @@ class lemin_data:
             self.data = lemin_player(self.lwin, lmap, game)
 
     def switch_mode(self, new_mode, lmap=None, game=None):
-#        if self.mode != M_MENU:
-#            self.data.events.unbind()
+        if self.mode != M_MENU:
+            self.data.events.unbind(self.lwin)
         self.lwin.reset()
         self.load_data(new_mode, lmap, game)
         if new_mode != M_MENU:
