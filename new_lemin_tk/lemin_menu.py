@@ -34,12 +34,24 @@ class lemin_menu:
         self.logo = Label(self.frame, text="LEMIN_TK",\
             font=("Helvetica", 48, "italic"),\
             fg="blue4", bg=BACKGROUND_COLOR)
+        # theme
+        self.app_style = ttk.Style()
+        self.app_style.theme_create("app_style", parent="alt",\
+        settings = {
+        "TCombobox": {"configure": {"highlightbackground": BACKGROUND_COLOR}},
+
+        "TButton":       {"configure": {"font"            :("Calibri", 13),
+                                        "background"      : "white",
+                                        "foreground"      : "black",
+                                        "padding"         : "6"},
+
+                            "map"      : {"background"      : [("active", "#0556E2"),
+                                ("disabled", "#8DBAE4")],
+                                        "foreground"      : [("active", 'white'),
+                                ("disabled", "grey")]}
+        }})
+        self.app_style.theme_use("app_style")
         # comboboxes
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_create("combostyle", parent="alt",\
-            settings = {"TCombobox": {"configure":\
-                        {"highlightbackground": BACKGROUND_COLOR}}})
-        self.combostyle.theme_use("combostyle")
         self.maps = {}
         self.select_map = ttk.Combobox(self.frame, state="readonly")
         self.select_map.set("          -- select map --")
@@ -47,21 +59,21 @@ class lemin_menu:
         self.select_solver = ttk.Combobox(self.frame, state="readonly")
         self.select_solver.set("        -- select solver --")
         # buttons
-        self.add_map_button = Button(self.frame, text="add map",\
-            command=self.add_map, highlightbackground=BACKGROUND_COLOR)
-        self.new_map_button = Button(self.frame, text="new map",\
-            command=self.new_map, highlightbackground=BACKGROUND_COLOR)
-        self.edit_map_button = Button(self.frame, text="edit map",\
-            command=self.edit_map, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
-        self.generate_map_button = Button(self.frame, text="generate map",\
-            command=self.generate_map, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
-        self.add_solver_button = Button(self.frame, text="add solver",\
-            command=self.add_solver, highlightbackground=BACKGROUND_COLOR)
-        self.play_button = Button(self.frame, text="play",\
-            command=self.play, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
+        self.add_map_button = ttk.Button(self.frame, text="add map",\
+            command=self.add_map)
+        self.new_map_button = ttk.Button(self.frame, text="new map",\
+            command=self.new_map)
+        self.edit_map_button = ttk.Button(self.frame, text="edit map",\
+            command=self.edit_map)
+        self.edit_map_button.state(["disabled"])
+        self.generate_map_button = ttk.Button(self.frame, text="generate map",\
+            command=self.generate_map)
+        self.generate_map_button.state(["disabled"])
+        self.add_solver_button = ttk.Button(self.frame, text="add solver",\
+            command=self.add_solver)
+        self.play_button = ttk.Button(self.frame, text="play",\
+            command=self.play)
+        self.play_button.state(["disabled"])
         # packing
         self.frame.pack(fill="both", expand=True)
         self.logo.pack(padx=20, pady=20)
@@ -101,10 +113,10 @@ class lemin_menu:
                 self.select_map["values"] += (map_name,)
             else:
                 self.select_map["values"] = (map_name)
-                self.edit_map_button.configure(state=NORMAL)
-            if self.play_button["state"] == DISABLED:
+                self.edit_map_button.state(["!disabled"])
+            if self.play_button.instate(["disabled"]):
                 if len(self.solvers) != 0:
-                    self.play_button.configure(state=NORMAL)
+                    self.play_button.state(["!disabled"])
             self.select_map.current(l)
 
     def edit_map(self):
@@ -151,9 +163,9 @@ class lemin_menu:
                 self.select_solver["values"] += (solver_name,)
             else:
                 self.select_solver["values"] = (solver_name)
-            if self.play_button["state"] == DISABLED:
+            if self.play_button.instate(["disabled"]):
                 if len(self.maps) != 0:
-                    self.play_button.configure(state=NORMAL)
+                    self.play_button.state(["!disabled"])
             self.select_solver.current(l)
 
     def play(self):
