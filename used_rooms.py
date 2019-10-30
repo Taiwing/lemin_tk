@@ -18,7 +18,7 @@ def remove_unused_rooms(lscr):
     lscr.roomn = len(lscr.lmap.rooms)
     lscr.grid.width_min = 0
     lscr.grid.height_min = 0
-    lscr.grid.get_min(lscr.screen_width, lscr.screen_height, lscr.roomn)
+    lscr.grid.get_min(lscr.lwin.screen_width, lscr.lwin.screen_height, lscr.roomn)
 
 def restore_unused_rooms(lscr):
     unused = []
@@ -34,7 +34,7 @@ def restore_unused_rooms(lscr):
     lscr.grid.height = lscr.grid.orig_h
     lscr.grid.width_min = 0
     lscr.grid.height_min = 0
-    lscr.grid.get_min(lscr.screen_width, lscr.screen_height, lscr.roomn)
+    lscr.grid.get_min(lscr.lwin.screen_width, lscr.lwin.screen_height, lscr.roomn)
     if lscr.grid.w_comp != 0 and lscr.grid.h_comp != 0:
         compress_coordinates(lscr, "cust", lscr.grid.w_comp, lscr.grid.h_comp)
     if lscr.grid.big_width < lscr.grid.width or lscr.grid.big_height < lscr.grid.height:

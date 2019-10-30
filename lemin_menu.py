@@ -8,37 +8,33 @@ import subprocess
 from utils import *
 from lemin_map_parser import *
 from lemin_map_checker import *
-from lemin_editor import *
 from lemin_game_parser import *
 from lemin_game_checker import *
-from lemin_player import *
+from switch import *
 
 BACKGROUND_COLOR = "DodgerBlue3"
+
+M_MENU = 1
+M_EDITOR = 2
+M_PLAYER = 3
 
 class lemin_menu:
     def __init__(self, lwin):
         # window data
-        self.win = lwin.win #TEMP TODO: remove this
-        self.screen_width = lwin.screen_width #TEMP
-        self.screen_height = lwin.screen_height #TEMP
+        self.lwin = lwin
         self.win_w = 300
         self.win_h = 500
         x, y = self.get_start_pos()
-        self.win.geometry(str(self.win_w) + "x" + str(self.win_h) + "+"\
+        self.lwin.win.geometry(str(self.win_w) + "x" + str(self.win_h) + "+"\
             + str(x) + "+" + str(y))
-        self.win.resizable(width=False, height=False)
+        self.lwin.win.resizable(width=False, height=False)
         # frame data
-        self.frame = Frame(self.win, bg=BACKGROUND_COLOR)
+        self.frame = Frame(self.lwin.win, bg=BACKGROUND_COLOR)
         # label
         self.logo = Label(self.frame, text="LEMIN_TK",\
             font=("Helvetica", 48, "italic"),\
             fg="blue4", bg=BACKGROUND_COLOR)
         # comboboxes
-        self.combostyle = ttk.Style()
-        self.combostyle.theme_create("combostyle", parent="alt",\
-            settings = {"TCombobox": {"configure":\
-                        {"highlightbackground": BACKGROUND_COLOR}}})
-        self.combostyle.theme_use("combostyle")
         self.maps = {}
         self.select_map = ttk.Combobox(self.frame, state="readonly")
         self.select_map.set("          -- select map --")
@@ -46,21 +42,21 @@ class lemin_menu:
         self.select_solver = ttk.Combobox(self.frame, state="readonly")
         self.select_solver.set("        -- select solver --")
         # buttons
-        self.add_map_button = Button(self.frame, text="add map",\
-            command=self.add_map, highlightbackground=BACKGROUND_COLOR)
-        self.new_map_button = Button(self.frame, text="new map",\
-            command=self.new_map, highlightbackground=BACKGROUND_COLOR)
-        self.edit_map_button = Button(self.frame, text="edit map",\
-            command=self.edit_map, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
-        self.generate_map_button = Button(self.frame, text="generate map",\
-            command=self.generate_map, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
-        self.add_solver_button = Button(self.frame, text="add solver",\
-            command=self.add_solver, highlightbackground=BACKGROUND_COLOR)
-        self.play_button = Button(self.frame, text="play",\
-            command=self.play, highlightbackground=BACKGROUND_COLOR,\
-            state=DISABLED)
+        self.add_map_button = ttk.Button(self.frame, text="add map",\
+            command=self.add_map)
+        self.new_map_button = ttk.Button(self.frame, text="new map",\
+            command=self.new_map)
+        self.edit_map_button = ttk.Button(self.frame, text="edit map",\
+            command=self.edit_map)
+        self.edit_map_button.state(["disabled"])
+        self.generate_map_button = ttk.Button(self.frame, text="generate map",\
+            command=self.generate_map)
+        self.generate_map_button.state(["disabled"])
+        self.add_solver_button = ttk.Button(self.frame, text="add solver",\
+            command=self.add_solver)
+        self.play_button = ttk.Button(self.frame, text="play",\
+            command=self.play)
+        self.play_button.state(["disabled"])
         # packing
         self.frame.pack(fill="both", expand=True)
         self.logo.pack(padx=20, pady=20)
@@ -72,12 +68,15 @@ class lemin_menu:
         self.select_solver.pack(padx=10, pady=10)
         self.add_solver_button.pack(padx=5, pady=5)
         self.play_button.pack(padx=5, pady=5)
+        # start menu loop
+        self.lwin.win.after(0, self.mainf)
 
     def get_start_pos(self):
-        x = (self.screen_width / 2) - (self.win_w / 2)
-        y = (self.screen_height / 2) - (self.win_h / 2)
+        x = (self.lwin.screen_width / 2) - (self.win_w / 2)
+        y = (self.lwin.screen_height / 2) - (self.win_h / 2)
         return int(x), int(y)
-
+        
+    ## menu functions ##
     def add_map(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
                 title = "Select map")
@@ -99,10 +98,10 @@ class lemin_menu:
                 self.select_map["values"] += (map_name,)
             else:
                 self.select_map["values"] = (map_name)
-                self.edit_map_button.configure(state=NORMAL)
-            if self.play_button["state"] == DISABLED:
+                self.edit_map_button.state(["!disabled"])
+            if self.play_button.instate(["disabled"]):
                 if len(self.solvers) != 0:
-                    self.play_button.configure(state=NORMAL)
+                    self.play_button.state(["!disabled"])
             self.select_map.current(l)
 
     def edit_map(self):
@@ -116,13 +115,17 @@ class lemin_menu:
         if lmap == None or lemin_map_checker(lmap):
             eprint("error: invalid map")
             return
-        file_name = edit_lemin_map(lmap)
-        self.add_map_file(file_name)
+        switch(M_EDITOR, lmap)
+        #TODO: switch to edit mode instead of this
+        #file_name = edit_lemin_map(lmap)
+        #self.add_map_file(file_name)
 
     def new_map(self):
-        file_name = edit_lemin_map(None)
-        print("file_name:", file_name)
-        self.add_map_file(file_name)
+        switch(M_EDITOR, None)
+        #TODO: switch to edit mode instead of this
+        #file_name = edit_lemin_map(None)
+        #self.add_map_file(file_name)
+        pass
 
     def generate_map(self):
         pass
@@ -145,9 +148,9 @@ class lemin_menu:
                 self.select_solver["values"] += (solver_name,)
             else:
                 self.select_solver["values"] = (solver_name)
-            if self.play_button["state"] == DISABLED:
+            if self.play_button.instate(["disabled"]):
                 if len(self.maps) != 0:
-                    self.play_button.configure(state=NORMAL)
+                    self.play_button.state(["!disabled"])
             self.select_solver.current(l)
 
     def play(self):
@@ -170,12 +173,14 @@ class lemin_menu:
         if game == None or lemin_game_checker(game, lmap):
             eprint("error: invalid solution")
             return
-        play_lemin_game(lmap, game)
+        switch(M_PLAYER, lmap, game)
     
     ## main loop function ##
-    def show_menu(self):
-        self.lscr.async_actions()
-        if self.lscr.win == None:
+    def mainf(self):
+        self.lwin.async_actions()
+        if self.lwin.win == None:
             return
-        self.lscr.update_screen()
-        self.lscr.win.after(1, self.show_menu)
+        if self.lwin.win.quit == True:
+            self.lwin.win.quit = False
+        else:
+            self.lwin.win.after(1, self.mainf)

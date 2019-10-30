@@ -4,7 +4,9 @@ from lemin_map_parser import *
 from lemin_game_parser import *
 from lemin_map_checker import *
 from lemin_game_checker import *
+from set_style import *
 from lemin_data import *
+from switch import *
 
 args = []
 command_line_mode = 0
@@ -42,6 +44,10 @@ if command_line_mode:
 else:
     mode = M_MENU
 
-lda = lemin_data()
+lda = lemin_data(command_line_mode)
+switch(lda=lda)
+set_style()
 lda.load_data(mode, lmap, game)
+if lda.lwin.redrawf:
+    lda.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
 lda.lwin.win.mainloop()

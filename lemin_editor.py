@@ -9,6 +9,124 @@ E_GRID_WIDTH_DEF = 160
 E_GRID_HEIGHT_DEF = 90
 CURSOR_COLOR = "DarkOrange3"
 
+## event handling of lemin_editor ##
+class editor_events:
+    def __init__(self, editor, lwin):
+        self.editor = editor
+        self.init_editor_actions(lwin)
+    
+    def init_editor_actions(self, lwin):
+        lwin.win.bind("<Left>", self.left_handler)
+        lwin.win.bind("<Right>", self.right_handler)
+        lwin.win.bind("<Up>", self.up_handler)
+        lwin.win.bind("<Down>", self.down_handler)
+        lwin.win.bind("<Home>", self.home_handler)
+        lwin.win.bind("<End>", self.end_handler)
+        lwin.win.bind("<Prior>", self.prior_handler)
+        lwin.win.bind("<Next>", self.next_handler)
+        lwin.win.bind("h", self.h_handler)
+        lwin.win.bind("l", self.l_handler)
+        lwin.win.bind("k", self.k_handler)
+        lwin.win.bind("j", self.j_handler)
+        lwin.win.bind("s", self.s_handler)
+        lwin.win.bind("e", self.e_handler)
+        lwin.win.bind("r", self.r_handler)
+        lwin.win.bind("c", self.c_handler)
+        lwin.win.bind("d", self.d_handler)
+        lwin.win.bind("m", self.m_handler)
+        lwin.win.bind("p", self.p_handler)
+        lwin.win.bind("<Control-s>", self.control_s_handler)
+        lwin.win.bind("<Command-s>", self.control_s_handler)
+        lwin.win.bind("<Control-S>", self.control_shift_s_handler)
+        lwin.win.bind("<Command-S>", self.control_shift_s_handler)
+        
+    def unbind(self, lwin):
+        lwin.win.unbind("<Left>")
+        lwin.win.unbind("<Right>")
+        lwin.win.unbind("<Up>")
+        lwin.win.unbind("<Down>")
+        lwin.win.unbind("<Home>")
+        lwin.win.unbind("<End>")
+        lwin.win.unbind("<Prior>")
+        lwin.win.unbind("<Next>")
+        lwin.win.unbind("h")
+        lwin.win.unbind("l")
+        lwin.win.unbind("k")
+        lwin.win.unbind("j")
+        lwin.win.unbind("s")
+        lwin.win.unbind("e")
+        lwin.win.unbind("r")
+        lwin.win.unbind("c")
+        lwin.win.unbind("d")
+        lwin.win.unbind("m")
+        lwin.win.unbind("p")
+        lwin.win.unbind("<Control-s>")
+        lwin.win.unbind("<Command-s>")
+        lwin.win.unbind("<Control-S>")
+
+    def left_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_left)
+
+    def right_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_right)
+
+    def up_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_up)
+
+    def down_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_down)
+
+    def home_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_all_left)
+
+    def end_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_all_right)
+
+    def prior_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_all_up)
+
+    def next_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_all_down)
+
+    def h_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_to_left_room)
+
+    def l_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_to_right_room)
+
+    def k_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_to_up_room)
+
+    def j_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_to_down_room)
+
+    def s_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.put_start)
+
+    def e_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.put_end)
+
+    def r_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.put_room)
+
+    def c_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.connect)
+
+    def d_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.delete_room)
+
+    def m_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.move_room)
+
+    def p_handler(self, event):
+        self.editor.debug()
+        
+    def control_s_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.save_map)
+
+    def control_shift_s_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.save_map_as)
+
 class lemin_editor:
     def __init__(self, lwin, lmap=None):
         if lmap == None:
@@ -16,8 +134,11 @@ class lemin_editor:
         # lemin screen
         self.lscr = lemin_screen(lwin, lmap, self.redraw,\
         self.move, self.refresh, self.wait)
-        self.lscr.init_canvas(self.init_editor_actions)
-        self.lscr.lwin.win.after(0, self.edit_map)
+        self.lscr.init_canvas()
+        # events and main loop
+        self.lscr.init_events()
+        self.events = editor_events(self, lwin)
+        self.lscr.lwin.win.after(0, self.mainf)
         # cursor data
         self.cur_x = 0
         self.cur_y = 0
@@ -72,95 +193,7 @@ class lemin_editor:
                 y += 1
         return -1, -1
 
-    ## event handling of lemin_editor ##
-    def init_editor_actions(self):
-        self.lscr.lwin.win.bind("<Left>", self.left_handler)
-        self.lscr.lwin.win.bind("<Right>", self.right_handler)
-        self.lscr.lwin.win.bind("<Up>", self.up_handler)
-        self.lscr.lwin.win.bind("<Down>", self.down_handler)
-        self.lscr.lwin.win.bind("<Home>", self.home_handler)
-        self.lscr.lwin.win.bind("<End>", self.end_handler)
-        self.lscr.lwin.win.bind("<Prior>", self.prior_handler)
-        self.lscr.lwin.win.bind("<Next>", self.next_handler)
-        self.lscr.lwin.win.bind("h", self.h_handler)
-        self.lscr.lwin.win.bind("l", self.l_handler)
-        self.lscr.lwin.win.bind("k", self.k_handler)
-        self.lscr.lwin.win.bind("j", self.j_handler)
-        self.lscr.lwin.win.bind("s", self.s_handler)
-        self.lscr.lwin.win.bind("e", self.e_handler)
-        self.lscr.lwin.win.bind("r", self.r_handler)
-        self.lscr.lwin.win.bind("c", self.c_handler)
-        self.lscr.lwin.win.bind("d", self.d_handler)
-        self.lscr.lwin.win.bind("m", self.m_handler)
-        self.lscr.lwin.win.bind("p", self.p_handler)
-        self.lscr.lwin.win.bind("<Control-s>", self.control_s_handler)
-        self.lscr.lwin.win.bind("<Command-s>", self.control_s_handler)
-        self.lscr.lwin.win.bind("<Control-S>", self.control_shift_s_handler)
-        self.lscr.lwin.win.bind("<Command-S>", self.control_shift_s_handler)
-
-    def left_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_left)
-
-    def right_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_right)
-
-    def up_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_up)
-
-    def down_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_down)
-
-    def home_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_all_left)
-
-    def end_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_all_right)
-
-    def prior_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_all_up)
-
-    def next_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_all_down)
-
-    def h_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_to_left_room)
-
-    def l_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_to_right_room)
-
-    def k_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_to_up_room)
-
-    def j_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_to_down_room)
-
-    def s_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.put_start)
-
-    def e_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.put_end)
-
-    def r_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.put_room)
-
-    def c_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.connect)
-
-    def d_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.delete_room)
-
-    def m_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.move_room)
-
-    def p_handler(self, event):
-        self.debug()
-        
-    def control_s_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.save_map)
-
-    def control_shift_s_handler(self, event):
-        self.lscr.lwin.stack.insert(0, self.save_map_as)
-
+    ## editor actions ##
     def move_left(self):
         if self.cur_x > 0:
             self.cur_x -= 1
@@ -416,14 +449,10 @@ class lemin_editor:
         pass
     
     ## main loop function ##
-    def edit_map(self):
+    def mainf(self):
         self.lscr.lwin.async_actions()
-        if self.lscr.lwin.win == None:
-            return
-        self.lscr.lwin.update_screen()
-        self.lscr.lwin.win.after(1, self.edit_map)
-
-def edit_lemin_map(lmap):    
-   e = lemin_editor(lmap) 
-   e.lscr.win.mainloop()
-   return e.file # for storing the file in the menu's combobox
+        if self.lscr.lwin.win.quit == True:
+            self.lscr.lwin.win.quit = False
+        elif self.lscr.lwin.valid_drawf():
+            self.lscr.lwin.update_screen()
+            self.lscr.lwin.win.after(1, self.mainf)
