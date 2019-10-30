@@ -50,5 +50,4 @@ set_style()
 lda.load_data(mode, lmap, game)
 if lda.lwin.redrawf:
     lda.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
-lda.lwin.win.after(0, lda.data.mainf)
 lda.lwin.win.mainloop()

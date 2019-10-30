@@ -47,4 +47,5 @@ class lemin_data:
         self.lwin.win = None
 
     def return_to_menu(self):
-        self.switch_mode(M_MENU)
+        self.lwin.win.after(0, lambda: self.switch_mode(M_MENU))
+        self.lwin.win.quit = True

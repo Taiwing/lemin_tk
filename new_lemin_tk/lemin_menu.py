@@ -68,6 +68,8 @@ class lemin_menu:
         self.select_solver.pack(padx=10, pady=10)
         self.add_solver_button.pack(padx=5, pady=5)
         self.play_button.pack(padx=5, pady=5)
+        # start menu loop
+        self.lwin.win.after(0, self.mainf)
 
     def get_start_pos(self):
         x = (self.lwin.screen_width / 2) - (self.win_w / 2)
@@ -178,4 +180,7 @@ class lemin_menu:
         self.lwin.async_actions()
         if self.lwin.win == None:
             return
-        self.lwin.win.after(1, self.mainf)
+        if self.lwin.win.quit == True:
+            self.lwin.win.quit = False
+        else:
+            self.lwin.win.after(1, self.mainf)

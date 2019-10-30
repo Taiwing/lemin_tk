@@ -27,6 +27,8 @@ class lemin_window:
         self.updatef = None
         # asynchronous actions stack (FIFO)
         self.stack = []
+        # stop loop
+        self.quit = False
 
     def reset(self):
         slaves = self.win.pack_slaves()
@@ -43,6 +45,18 @@ class lemin_window:
         self.refreshf = refreshf
         self.waitf = waitf
         self.updatef = updatef
+
+    def valid_drawf(self):
+        if self.update == U_REDRAW:
+            return self.redrawf != None and self.updatef != None
+        elif self.update == U_MOVE:
+            return self.movef != None and self.updatef != None
+        elif self.update == U_REFRESH:
+            return self.refreshf != None and self.updatef != None
+        elif self.update == U_WAIT:
+            return self.waitf != None
+        else:
+            return self.update == U_NONE
     
     def update_update(self, upid):
         return upid if self.update < upid else self.update

@@ -233,8 +233,6 @@ class lemin_player:
     ## main loop function ##
     def mainf(self):
         self.lscr.lwin.async_actions()
-        if self.lscr.lwin.win == None:
-            return
         if self.play == True and self.lscr.lwin.update != U_WAIT:
             if self.turn < self.game_len - 1:
                 self.step += 1
@@ -248,5 +246,8 @@ class lemin_player:
                     self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
             else:
                 self.play = False
-        self.lscr.lwin.update_screen()
-        self.lscr.lwin.win.after(1, self.mainf)
+        if self.lscr.lwin.win.quit == True:
+            self.lscr.lwin.win.quit = False
+        elif self.lscr.lwin.valid_drawf():
+            self.lscr.lwin.update_screen()
+            self.lscr.lwin.win.after(1, self.mainf)
