@@ -5,6 +5,4 @@
 - a map generator
 - make lemin_config file to store values and current lemin conf
 - add a settings menu and a settings file to tweak lemin_tk's behavior
-- make it possible to run lemin_tk without providing it a map and to select
-  the map and solver from a menu
 - optimize printing

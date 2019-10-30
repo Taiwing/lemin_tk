@@ -246,8 +246,8 @@ class lemin_player:
                     self.lscr.lwin.update = self.lscr.lwin.update_update(U_REFRESH)
             else:
                 self.play = False
-        if self.lscr.lwin.win.quit == True:
-            self.lscr.lwin.win.quit = False
+        if self.lscr.lwin.quit == True:
+            self.lscr.lwin.quit = False
         elif self.lscr.lwin.valid_drawf():
             self.lscr.lwin.update_screen()
             self.lscr.lwin.win.after(1, self.mainf)
