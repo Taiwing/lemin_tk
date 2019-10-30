@@ -83,6 +83,8 @@ class lemin_player:
         self.game_len = len(self.game)
         self.play = False
         self.turn = 0
+        # output
+        self.file = None # will not be used but is needed in lemin_data
     
     def play_pause(self):
         self.play = True if self.play == False else False

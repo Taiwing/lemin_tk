@@ -15,6 +15,8 @@ class lemin_data:
         self.lwin.win.protocol("WM_DELETE_WINDOW", self.close_handler)
         self.mode = None
         self.data = None
+        self.mstate = None
+        self.newmap = None
         self.command_line_mode = command_line_mode
 
     def load_data(self, mode, lmap=None, game=None):
@@ -29,11 +31,18 @@ class lemin_data:
     def switch_mode(self, new_mode, lmap=None, game=None):
         if self.mode != M_MENU:
             self.data.events.unbind(self.lwin)
+            self.newmap = self.data.file
+        else:
+            self.mstate = self.data.save_menu_state()
         self.lwin.reset()
         self.load_data(new_mode, lmap, game)
         if new_mode != M_MENU:
             self.lwin.win.resizable(width=True, height=True)
             self.lwin.redrawf() #TODO: REMOVE THIS (OR AT LEAST MOVE IT)
+        else:
+            self.data.load_menu_state(self.mstate, self.newmap)
+            self.newmap = None
+            self.mstate = None
 
     def close_handler(self):
         self.lwin.stack.clear()

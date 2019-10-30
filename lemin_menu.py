@@ -77,6 +77,28 @@ class lemin_menu:
         return int(x), int(y)
         
     ## menu functions ##
+    def save_menu_state(self):
+        mstate = {}
+        mstate["maps"] = []
+        mstate["solvers"] = []
+        for m in self.maps:
+            mstate["maps"].append(self.maps[m])
+        for s in self.solvers:
+            mstate["solvers"].append(self.solvers[s])
+        if len(mstate["maps"]) > 0 or len(mstate["solvers"]) > 0:
+            return mstate
+        else:
+            return None
+
+    def load_menu_state(self, mstate, newmap):
+        if mstate != None:
+            for map_file in mstate["maps"]:
+                self.add_map_file(map_file)
+            for solver_file in mstate["solvers"]:
+                self.add_solver_file(solver_file)
+        if newmap != None:
+            self.add_map_file(newmap)
+
     def add_map(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
                 title = "Select map")
@@ -133,6 +155,9 @@ class lemin_menu:
     def add_solver(self):
         file_name = filedialog.askopenfilename(initialdir = "~",\
                 title = "Select solver")
+        self.add_solver_file(file_name)
+
+    def add_solver_file(self, file_name):
         if file_name != None and len(file_name) > 0:
             solver_name = os.path.basename(file_name)
             if solver_name not in self.solvers:
