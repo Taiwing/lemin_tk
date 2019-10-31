@@ -5,14 +5,16 @@ from lemin_map import *
 # apply a BFS to check if start and end are connected
 def find_end(lmap, start, end):
     curlvl = [start]
+    passed = []
+    i = 0
     while curlvl:
         cur = curlvl.pop(0)
-        if cur == end:
-            return 1
-        lmap.rooms[cur].discovered = True
+        passed.append(cur)
         for r in lmap.rooms[cur].links:
-            if lmap.rooms[r].discovered == False:
+            if r not in passed and r not in curlvl:
                 curlvl.append(r)
+                if r == end:
+                    return 1
     return 0
 
 def lemin_map_checker(lmap):
