@@ -20,7 +20,7 @@ class lemin_map:
     def set_antn(self, antn, commands):
         commands.clear() #until antn commands are added if any
         if antn <= 0:
-            map_eprint(str(ant) + " is an invalid number of ants")
+            map_eprint(str(antn) + " is an invalid number of ants")
             exit()
         self.antn = antn
 
