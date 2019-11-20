@@ -51,3 +51,25 @@ save map (save map as if current map is not saved)
 save map as
 save map as
 """
+
+PLAYER_COMMANDS = """
+space:
+left:
+right:
+up:
+down:
+r:
+e:
+d:
+"""
+
+PLAYER_DESC = """
+play/pause
+go back one turn
+go forward one turn
+speed up
+speed down
+reset
+go to the end
+debug
+"""

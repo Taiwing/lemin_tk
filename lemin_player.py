@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from lemin_screen import *
+from lemin_help import *
 
 # graphical constants
 G_FRAMEC_MIN = 10
@@ -25,6 +26,7 @@ class player_events:
         lwin.win.bind("r", self.r_handler)
         lwin.win.bind("e", self.e_handler)
         lwin.win.bind("d", self.d_handler)
+        lwin.win.bind("<F1>", self.f1_handler)
 
     def unbind(self, lwin):
         lwin.win.unbind("<space>")
@@ -35,6 +37,7 @@ class player_events:
         lwin.win.unbind("r")
         lwin.win.unbind("e")
         lwin.win.unbind("d")
+        lwin.win.unbind("<F1>")
     
     def space_handler(self, event):
         self.player.lscr.lwin.stack.insert(0, self.player.play_pause)
@@ -59,6 +62,9 @@ class player_events:
 
     def d_handler(self, event):
         self.player.debug()
+
+    def f1_handler(self, event):
+        self.player.lscr.lwin.stack.insert(0, self.player.show_help)
 
 class lemin_player:
     def __init__(self, lwin, lmap, game):
@@ -147,6 +153,16 @@ class lemin_player:
         print("self.lscr.lwin.stack:", self.lscr.lwin.stack)
         print("self.lscr.grid.w_comp =", self.lscr.grid.w_comp)
         print("self.lscr.grid.h_comp =", self.lscr.grid.h_comp)
+
+    def show_help(self):
+        top = Toplevel()
+        label1 = Label(top, text="Lemin_tk player commands:")
+        label1.grid(row=0, column=0, columnspan=2)
+        label2 = Label(top, text=PLAYER_COMMANDS, justify=LEFT)
+        label2.grid(row=1, column=0)
+        label3 = Label(top, text=PLAYER_DESC, justify=RIGHT)
+        label3.grid(row=1, column=1)
+        top.resizable(width=False, height=False)
 
     ## drawing functions specific to lemin_player ##
     def ant_coords(self, g_x, g_y):
