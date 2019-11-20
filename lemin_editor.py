@@ -399,8 +399,8 @@ class lemin_editor:
         label1.grid(row=0, column=0, columnspan=2)
         label2 = Label(top, text=EDITOR_COMMANDS, justify=LEFT)
         label2.grid(row=1, column=0)
-        label2 = Label(top, text=EDITOR_DESC, justify=RIGHT)
-        label2.grid(row=1, column=1)
+        label3 = Label(top, text=EDITOR_DESC, justify=RIGHT)
+        label3.grid(row=1, column=1)
         top.resizable(width=False, height=False)
 
     ## drawing functions specific to lemin_editor ##
