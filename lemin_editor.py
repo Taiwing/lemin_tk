@@ -2,6 +2,7 @@
 
 from lemin_screen import *
 from lemin_map import *
+from lemin_help import *
 from tkinter import filedialog
 
 # editor constants
@@ -39,6 +40,7 @@ class editor_events:
         lwin.win.bind("<Command-s>", self.control_s_handler)
         lwin.win.bind("<Control-S>", self.control_shift_s_handler)
         lwin.win.bind("<Command-S>", self.control_shift_s_handler)
+        lwin.win.bind("<F1>", self.f1_handler)
         
     def unbind(self, lwin):
         lwin.win.unbind("<Left>")
@@ -63,6 +65,8 @@ class editor_events:
         lwin.win.unbind("<Control-s>")
         lwin.win.unbind("<Command-s>")
         lwin.win.unbind("<Control-S>")
+        lwin.win.unbind("<Command-S>")
+        lwin.win.unbind("<F1>")
 
     def left_handler(self, event):
         self.editor.lscr.lwin.stack.insert(0, self.editor.move_left)
@@ -126,6 +130,9 @@ class editor_events:
 
     def control_shift_s_handler(self, event):
         self.editor.lscr.lwin.stack.insert(0, self.editor.save_map_as)
+
+    def f1_handler(self, event):
+        self.editor.lscr.lwin.stack.insert(0, self.editor.show_help)
 
 class lemin_editor:
     def __init__(self, lwin, lmap=None):
@@ -385,6 +392,16 @@ class lemin_editor:
         self.file = filedialog.asksaveasfilename(initialdir = "~", title = "Save map")
         if self.file != None and len(self.file) > 0:
             self.lscr.lmap.write_to_file(self.file)
+
+    def show_help(self):
+        top = Toplevel()
+        label1 = Label(top, text="Lemin_tk editor commands:")
+        label1.grid(row=0, column=0, columnspan=2)
+        label2 = Label(top, text=EDITOR_COMMANDS, justify=LEFT)
+        label2.grid(row=1, column=0)
+        label2 = Label(top, text=EDITOR_DESC, justify=RIGHT)
+        label2.grid(row=1, column=1)
+        top.resizable(width=False, height=False)
 
     ## drawing functions specific to lemin_editor ##
     def draw_cursor(self):

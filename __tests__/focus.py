@@ -5,6 +5,8 @@
 from tkinter import *
 from tkinter.ttk import *
 
+BACKGROUND_COLOR = "DodgerBlue3"
+
 # creating master window 
 master = Tk()
 
@@ -21,7 +23,7 @@ e1 = Entry(master)
 e1.pack(expand = 1, fill = BOTH) 
 
 # Button Widget 
-e2 = Button(master, text ="Button") 
+e2 = Button(master, text ="Button", hilightbackground=BACKGROUND_COLOR) 
 e2.pack(pady = 5) 
 
 # Radiobutton widget 
